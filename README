@@ -1,0 +1,11 @@
+This is a nginx module that uses libiconv to convert characters of different
+encoding.
+
+Here is a basic example:
+	
+#nginx.conf
+	location /foo {
+		set $src '你好'; #in UTF-8
+		set_iconv $dst $src from=utf8 to=gbk; #now $dst holds 你好 in GBK
+	}
+
