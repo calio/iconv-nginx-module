@@ -98,10 +98,14 @@ static ngx_int_t
 ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
     ngx_http_variable_value_t *v)
 {
-    ngx_int_t           done;
-    ngx_chain_t         chain;
+    ngx_int_t            done;
+    ngx_chain_t          chain_head;
     ngx_chain_t         *chain_p;
     ngx_buf_t           *buf;
+    iconv_t              cd;
+    u_char              *src, *dst, *p;
+    size_t               convsize, buf_size, leftlen;
+    u_char *             end;
 
     if (v->len == 0) {
         res->data = 0;
@@ -109,17 +113,58 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
         return NGX_OK;
     }
 
-    done = 0;
-
-    while (!done) {
-        buf = ngx_palloc(r->pool, sizeof(iconv_buf_t));
-
-        buf->data = ngx_palloc(r->pool, iconv_buf_size);
-        buf->len = iconv_buf_size;
-
+    src = ngx_palloc(r->pool, v[1].len + 1);
+    if (src == NULL) {
+        return NGX_ERROR;
     }
 
-    fprintf(stderr, "%.*s\n%.*s\n%.*s\n",v[0].len, v[0].data,v[1].len, v[1].data, v[2].len, v[2].data);
+    dst = ngx_palloc(r->pool, v[2].len + 1);
+    if (dst == NULL) {
+        return NGX_ERROR;
+    }
+
+    end = ngx_copy(src, v[1].data, v[1].len);
+    *end = '\0';
+    end = ngx_copy(dst, v[2].data, v[2].len);
+    *end = '\0';
+
+    cd = iconv_open((const char *)dst, (const char *)src);
+
+    if (cd == (iconv_t)-1) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                "iconv_open error");
+    }
+
+    done = 0;
+    chain_p = &chain_head;
+    p = v[0].data;
+    leftlen = v[0].len;
+
+    while (!done) {
+        chain_p->next = ngx_palloc(r->pool, sizeof(ngx_chain_t));
+        chain_p = chain_p->next;
+        buf = ngx_alloc_buf(r->pool);
+        chain_p->buf = buf;
+        buf->start = ngx_palloc(r->pool, iconv_buf_size);
+        buf->pos = buf->start;
+        buf->end = buf->start + iconv_buf_size;
+
+        buf_size = (size_t)iconv_buf_size;
+        convsize = iconv(cd, (char **)&p, &leftlen, (char **)&buf->pos,
+                &buf_size);
+        if(convsize == (size_t)-1) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                "iconv error");
+           return NGX_ERROR;
+        }
+        buf->last = buf->pos;
+        if(leftlen <= 0) {
+            done = 1;
+        }
+    }
+
+    iconv_close(cd);
+    //fprintf(stderr, "%.*s\n%.*s\n%.*s\n",v[0].len, v[0].data,v[1].len, v[1].data, v[2].len, v[2].data);
     dd("test debug");
     return NGX_OK;
 }
