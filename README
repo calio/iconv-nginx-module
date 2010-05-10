@@ -8,15 +8,15 @@ encoding. It brings the 'set_iconv' command to nginx.
 
 Installation
 
-    Get the nginx source code from nginx.net (<http://nginx.net/>).
-    Untar the source code and build nginx with this module:
+    Get the nginx source code from nginx.net (http://nginx.net/).
+    Untar the source code and build nginx with this module.
 
         $ wget 'http://sysoev.ru/nginx/nginx-0.8.28.tar.gz'
         $ tar -xzvf nginx-0.8.28.tar.gz
         $ cd nginx-0.8.28/
 
         $ ./configure --add-module=/somepath/iconv-nginx-module/
-        $ make -2
+        $ make -j2
         $ make install
 
 Usage
