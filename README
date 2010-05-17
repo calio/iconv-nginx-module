@@ -17,8 +17,8 @@ Installation
         $ tar -xzvf nginx-0.8.28.tar.gz
         $ cd nginx-0.8.28/
 
-        $ git-clone http://github.com/simpl-it/ngx_devel_kit.git
-        $ git-clone http://github.com/calio/form-input-module.git
+        $ git clone http://github.com/simpl-it/ngx_devel_kit.git
+        $ git clone http://github.com/calio/form-input-module.git
 
         $ ./configure --add-module=/somepath/iconv-nginx-module/ --add-module=/somepath/ngx_devel_kit
         $ make -j2
@@ -26,7 +26,7 @@ Installation
 
 Usage
 
-    set_iconv <destination variable> <from variable> from=<from code> to=<to code>;
+    set_iconv $destination-variable $from-variable from=from-code to=to-code;
 
     Here is a basic example:
 	

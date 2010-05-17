@@ -65,7 +65,7 @@ static char *
 ngx_http_set_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
     ndk_set_var_t                filter;
-    ngx_str_t                   *var_name, s[3];
+    ngx_str_t                   *value, s[3];
 
     iconv_buf_size = 1024;
     max_iconv_bufs = 256;
@@ -74,25 +74,26 @@ ngx_http_set_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     filter.func = ngx_http_set_iconv_handler;
     filter.size = 3;
 
-    var_name = cf->args->elts;
-    var_name++;
-    s[0] = *(var_name + 1);
+    value = cf->args->elts;
+    value++;
+    s[0] = value[1];
 
     /* 'from', 'to' in set_iconv command is case sensitive */
-    s[1] = *(var_name + 2);
-    if (ngx_strncasecmp((u_char *)"from=", s[1].data, sizeof("from=") - 1)
-            != 0) {
+    s[1] = value[2];
+    if (ngx_strncasecmp((u_char *) "from=", s[1].data, sizeof("from=") - 1)
+        != 0)
+    {
         return NGX_CONF_ERROR;
     }
     s[1].data += sizeof("from=") - 1;
 
-    s[2] = *(var_name + 3);
-    if (ngx_strncasecmp((u_char *)"to=", s[2].data, sizeof("to=") - 1) != 0) {
+    s[2] = value[3];
+    if (ngx_strncasecmp((u_char *) "to=", s[2].data, sizeof("to=") - 1) != 0) {
         return NGX_CONF_ERROR;
     }
     s[2].data += sizeof("to=") - 1;
 
-    return ndk_set_var_multi_value_core(cf, var_name, s, &filter);
+    return ndk_set_var_multi_value_core(cf, value, s, &filter);
 }
 
 
@@ -102,11 +103,11 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
 {
     ngx_int_t            done;
     ngx_chain_t          chain_head;
-    ngx_chain_t         *chain_p;
+    ngx_chain_t         *cl;
     ngx_buf_t           *buf;
     iconv_t              cd;
     u_char              *src, *dst, *p;
-    size_t               convsize, buf_size, leftlen, outlen;
+    size_t               size, buf_size, rest, converted;
     u_char *             end;
 
     if (v->len == 0) {
@@ -132,29 +133,29 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
     *end = '\0';
 
     dd("dst:%s\n, src:%s\n", dst, src);
-    cd = iconv_open((const char *)dst, (const char *)src);
+    cd = iconv_open((const char *) dst, (const char *) src);
 
-    if (cd == (iconv_t)-1) {
+    if (cd == (iconv_t) -1) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                 "iconv_open error");
     }
 
-    chain_p = &chain_head;
+    cl = &chain_head;
     p = v[0].data;
-    leftlen = v[0].len;
+    rest = v[0].len;
 
-    outlen = 0;
+    converted = 0;
     done = 0;
 
     while (!done) {
-        chain_p->next = ngx_palloc(r->pool, sizeof(ngx_chain_t));
-        if (chain_p->next == NULL) {
+        cl->next = ngx_palloc(r->pool, sizeof(ngx_chain_t));
+        if (cl->next == NULL) {
             return NGX_ERROR;
         }
 
-        chain_p = chain_p->next;
+        cl = cl->next;
         buf = ngx_alloc_buf(r->pool);
-        chain_p->buf = buf;
+        cl->buf = buf;
 
         buf->start = ngx_palloc(r->pool, iconv_buf_size);
         if (buf->start == NULL) {
@@ -164,13 +165,13 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
         buf->pos = buf->start;
         buf->last = buf->pos;
         buf->end = buf->start + iconv_buf_size;
-        buf_size = (size_t)iconv_buf_size;
+        buf_size = (size_t) iconv_buf_size;
 
-        convsize = iconv(cd, (char **)&p, &leftlen, (char **)&buf->last,
+        size = iconv(cd, (char **) &p, &rest, (char **) &buf->last,
                 &buf_size);
         dd("%.*s\n", buf->last - buf->pos, buf->pos);
 
-        if(convsize == (size_t)-1 && errno != E2BIG) {
+        if (size == (size_t) -1 && errno != E2BIG) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                 "iconv error");
             if (errno == E2BIG) {
@@ -183,9 +184,9 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
             return NGX_ERROR;
         }
 
-        outlen += (buf->last - buf->pos);
+        converted += buf->last - buf->pos;
 
-        if(leftlen <= 0) {
+        if (rest <= 0) {
             done = 1;
         }
     }
@@ -194,16 +195,16 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
 
     dd("convert finished");
 
-    res->data = ngx_palloc(r->pool, outlen);
-    if(res->data == NULL) {
+    res->data = ngx_palloc(r->pool, converted);
+    if (res->data == NULL) {
         return NGX_ERROR;
     }
 
     p = res->data;
-    res->len = outlen;
+    res->len = converted;
 
-    for (chain_p = chain_head.next; chain_p; chain_p = chain_p->next) {
-        buf = chain_p->buf;
+    for (cl = chain_head.next; cl; cl = cl->next) {
+        buf = cl->buf;
         p = ngx_copy(p, buf->pos, buf->last - buf->pos);
     }
     dd("%.*s\n%.*s\n%.*s\n",v[0].len, v[0].data,v[1].len, v[1].data, v[2].len,
