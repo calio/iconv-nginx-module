@@ -15,6 +15,8 @@ use Cwd qw( cwd );
 use List::Util qw( shuffle );
 use Time::HiRes qw( sleep );
 
+our $LatestNginxVersion = 0.008039;
+
 our $NoNginxManager = 0;
 our $Profiling = 0;
 
@@ -23,13 +25,15 @@ our $MAX_PROCESSES = 10;
 
 our $NoShuffle = 0;
 
+our $UseValgrind = $ENV{TEST_NGINX_USE_VALGRIND};
+
 sub no_shuffle () {
     $NoShuffle = 1;
 }
 
 our $ForkManager;
 
-if ($Profiling) {
+if ($Profiling || $UseValgrind) {
     eval "use Parallel::ForkManager";
     if ($@) {
         die "Failed to load Parallel::ForkManager: $@\n";
@@ -127,7 +131,7 @@ our @EXPORT_OK = qw(
 );
 
 
-if ($Profiling) {
+if ($Profiling || $UseValgrind) {
     $DaemonEnabled          = 'off';
     $MasterProcessEnabled   = 'off';
 }
@@ -168,7 +172,7 @@ sub run_tests () {
         #}
     }
 
-    if ($Profiling) {
+    if ($Profiling || $UseValgrind) {
         $ForkManager->wait_all_children;
     }
 }
@@ -315,8 +319,14 @@ sub parse_headers ($) {
     open my $in, '<', \$s;
     while (<$in>) {
         s/^\s+|\s+$//g;
-        my ($key, $val) = split /\s*:\s*/, $_, 2;
-        $headers{$key} = $val;
+        my $neg = ($_ =~ s/^!\s*//);
+        #warn "neg: $neg ($_)";
+        if ($neg) {
+            $headers{$_} = undef;
+        } else {
+            my ($key, $val) = split /\s*:\s*/, $_, 2;
+            $headers{$key} = $val;
+        }
     }
     close $in;
     return \%headers;
@@ -435,6 +445,10 @@ start_nginx:
         #Test::More::BAIL_OUT("$name - Invalid config file");
         #}
         #my $cmd = "nginx -p $ServRoot -c $ConfFile > /dev/null";
+            if (!defined $NginxVersion) {
+                $NginxVersion = $LatestNginxVersion;
+            }
+
             my $cmd;
             if ($NginxVersion >= 0.007053) {
                 $cmd = "nginx -p $ServRoot/ -c $ConfFile > /dev/null";
@@ -442,16 +456,38 @@ start_nginx:
                 $cmd = "nginx -c $ConfFile > /dev/null";
             }
 
-            if ($Profiling) {
+            if ($UseValgrind) {
+                if (-f 'valgrind.suppress') {
+                    $cmd = "valgrind -q --leak-check=full --gen-suppressions=all --suppressions=valgrind.suppress $cmd";
+                } else {
+                    $cmd = "valgrind -q --leak-check=full --gen-suppressions=all $cmd";
+                }
+
+                warn "$name\n";
+                #warn "$cmd\n";
+            }
+
+            if ($Profiling || $UseValgrind) {
                 my $pid = $ForkManager->start;
                 if (!$pid) {
                     # child process
+                    exec $cmd;
+
+=begin cmt
+
                     if (system($cmd) != 0) {
                         Test::More::BAIL_OUT("$name - Cannot start nginx using command \"$cmd\".");
                     }
 
                     $ForkManager->finish; # terminate the child process
+
+=end cmt
+
+=cut
+
                 }
+                #warn "sleeping";
+                sleep 2;
             } else {
                 if (system($cmd) != 0) {
                     Test::More::BAIL_OUT("$name - Cannot start nginx using command \"$cmd\".");
@@ -488,12 +524,39 @@ start_nginx:
         }
     }
 
-    if (defined $block->quit && $Profiling) {
-        warn "Found quit...";
+    if ($Profiling || $UseValgrind) {
+        #warn "Found quit...";
         if (-f $PidFile) {
+            #warn "found pid file...";
             my $pid = get_pid_from_pidfile($name);
             if (system("ps $pid > /dev/null") == 0) {
                 write_config_file($config, $block->http_config);
+                if (kill(SIGQUIT, $pid) == 0) { # send quit signal
+                    warn("$name - Failed to send quit signal to the nginx process with PID $pid");
+                }
+                sleep 2;
+                if (-f $PidFile) {
+                    #warn "killing with force (valgrind or profile)...\n";
+                    kill(SIGKILL, $pid);
+                    sleep 0.02;
+                } else {
+                    #warn "nginx killed";
+                }
+            } else {
+                unlink $PidFile or
+                    die "Failed to remove pid file $PidFile\n";
+            }
+        } else {
+            #warn "pid file not found";
+        }
+    }
+}
+
+END {
+    if ($UseValgrind) {
+        if (-f $PidFile) {
+            my $pid = get_pid_from_pidfile('');
+            if (system("ps $pid > /dev/null") == 0) {
                 if (kill(SIGQUIT, $pid) == 0) { # send quit signal
                     #warn("$name - Failed to send quit signal to the nginx process with PID $pid");
                 }
@@ -504,8 +567,7 @@ start_nginx:
                     sleep 0.02;
                 }
             } else {
-                unlink $PidFile or
-                    die "Failed to remove pid file $PidFile\n";
+                unlink $PidFile;
             }
         }
     }

@@ -1,4 +1,4 @@
-#define DDEBUG 1
+#define DDEBUG 0
 #include "ddebug.h"
 
 #include <ndk.h>
@@ -446,12 +446,14 @@ ngx_http_set_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         return NGX_CONF_ERROR;
     }
     s[1].data += sizeof("from=") - 1;
+    s[1].len -= (sizeof("from=") - 1);
 
     s[2] = value[3];
     if (ngx_strncasecmp((u_char *) "to=", s[2].data, sizeof("to=") - 1) != 0) {
         return NGX_CONF_ERROR;
     }
     s[2].data += sizeof("to=") - 1;
+    s[2].len -= (sizeof("to=") - 1);
 
     return ndk_set_var_multi_value_core(cf, value, s, &filter);
 }

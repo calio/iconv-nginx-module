@@ -61,7 +61,7 @@ our @EXPORT = qw( plan run_tests run_test
     server_addr
 );
 
-sub send_request ($$$);
+sub send_request ($$$$);
 
 sub run_test_helper ($);
 
@@ -214,9 +214,16 @@ $parsed_req->{content}";
     }
 
     my $raw_resp = send_request($req, $block->raw_request_middle_delay,
-        $timeout);
+        $timeout, $block->name);
 
     #warn "raw resonse: [$raw_resp]\n";
+
+    my $raw_headers = '';
+    if ($raw_resp =~ /(.*?)\r\n\r\n/s) {
+        #warn "\$1: $1";
+        $raw_headers = $1;
+    }
+    #warn "raw headers: $raw_headers\n";
 
     my $res = HTTP::Response->parse($raw_resp);
     my $enc = $res->header('Transfer-Encoding');
@@ -258,7 +265,7 @@ $parsed_req->{content}";
                 fail "$name - invalid chunked body received: $&";
                 return;
             } else {
-                fail "$name - no last chunk found";
+                fail "$name - no last chunk found - $raw";
                 return;
             }
         }
@@ -275,11 +282,18 @@ $parsed_req->{content}";
     if (defined $block->response_headers) {
         my $headers = parse_headers($block->response_headers);
         while (my ($key, $val) = each %$headers) {
-            my $expected_val = $res->header($key);
-            if (!defined $expected_val) {
-                $expected_val = '';
+            if (!defined $val) {
+                #warn "HIT";
+                unlike $raw_headers, qr/^\s*\Q$key\E\s*:/ms, "$name - header $key not present in the raw headers";
+                next;
             }
-            is $expected_val, $val,
+
+            my $actual_val = $res->header($key);
+            if (!defined $actual_val) {
+                $actual_val = '';
+            }
+
+            is $actual_val, $val,
                 "$name - header $key ok";
         }
     } elsif (defined $block->response_headers_like) {
@@ -341,8 +355,8 @@ $parsed_req->{content}";
     }
 }
 
-sub send_request ($$$) {
-    my ($req, $middle_delay, $timeout) = @_;
+sub send_request ($$$$) {
+    my ($req, $middle_delay, $timeout, $name) = @_;
 
     my @req_bits = ref $req ? @$req : ($req);
 
@@ -350,7 +364,8 @@ sub send_request ($$$) {
         PeerAddr => $ServerAddr,
         PeerPort => $ServerPortForClient,
         Proto    => 'tcp'
-    ) or die "Can't connect to localhost:$ServerPortForClient: $!\n";
+    ) or
+        die "Can't connect to $ServerAddr:$ServerPortForClient: $!\n";
 
     my $flags = fcntl $sock, F_GETFL, 0
         or die "Failed to get flags: $!\n";
@@ -366,6 +381,7 @@ sub send_request ($$$) {
         write_buf => shift @req_bits,
         middle_delay => $middle_delay,
         sock => $sock,
+        name => $name,
     };
 
     my $readable_hdls = IO::Select->new($sock);
@@ -488,7 +504,8 @@ sub send_request ($$$) {
 }
 
 sub timeout_event_handler ($) {
-    warn "socket client: timed out";
+    my $ctx = shift;
+    warn "ERROR: socket client: timed out - $ctx->{name}\n";
 }
 
 sub error_event_handler ($) {
