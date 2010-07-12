@@ -28,6 +28,7 @@ GET /foo
 --- response_body
 你好
 
+
 === TEST 2
 --- config
     location /foo {
