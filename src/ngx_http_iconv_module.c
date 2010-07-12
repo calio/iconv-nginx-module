@@ -1,4 +1,4 @@
-#define DDEBUG 1
+#define DDEBUG 0
 #include "ddebug.h"
 
 #include <ndk.h>
@@ -434,11 +434,11 @@ ngx_http_set_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     filter.func = ngx_http_set_iconv_handler;
     filter.size = 3;
 
+    /* set_iconv $dst $src from= to= */
     value = cf->args->elts;
     value++;
     s[0] = value[1];
 
-    /* 'from', 'to' in set_iconv command is case sensitive */
     s[1] = value[2];
     if (ngx_strncasecmp((u_char *) "from=", s[1].data, sizeof("from=") - 1)
         != 0)
