@@ -1,6 +1,7 @@
 ngx_feature_name=
 ngx_feature_run=no
 ngx_feature_incs="#include <iconv.h>"
+ngx_feature_test='(void) iconv_open("utf-8","gbk");'
 
 ngx_feature="iconv"
 ngx_feature_path=
@@ -8,6 +9,7 @@ ngx_feature_path=
 
 if [ $ngx_found = no ]; then
     ngx_feature_path="/usr/include"
+    echo "Not found in system: $ngx_found"
     . auto/feature
 fi
 

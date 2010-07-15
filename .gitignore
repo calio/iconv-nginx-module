@@ -1,3 +1,5 @@
+*.html
+src/module.c
 .libs
 *.swp
 *.slo

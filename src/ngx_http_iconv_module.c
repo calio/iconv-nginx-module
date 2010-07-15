@@ -215,7 +215,6 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
     if (buf == NULL) {
         return NGX_ERROR;
     }
-    //buf->memory = 1;
 
     ncl->buf = buf;
     if (ctx->uc.len) {
