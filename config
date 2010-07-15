@@ -1,16 +1,40 @@
 ngx_feature_name=
 ngx_feature_run=no
 ngx_feature_incs="#include <iconv.h>"
-ngx_feature_test='(void) iconv_open("utf-8","gbk");'
+ngx_feature_test='iconv_t cd =  iconv_open("utf-8","gbk");
+iconv_close(cd);'
 
-ngx_feature="iconv"
-ngx_feature_path=
-. auto/feature
-
-if [ $ngx_found = no ]; then
-    ngx_feature_path="/usr/include"
-    echo "Not found in system: $ngx_found"
+if [ -n "$LIBICONV_INC" ]; then
+    ngx_feature="libiconv in directories specified by LIBICONV_INC ($LIBICONV_INC)"
+    ngx_feature_path="$LIBICONV_INC"
     . auto/feature
+else
+    # auto-discovery
+    ngx_feature="iconv"
+    ngx_feature_path=
+    . auto/feature
+
+    if [ $ngx_found = no ]; then
+        ngx_feature_path="/usr/include"
+        . auto/feature
+    fi
+
+    if [ $ngx_found = no ]; then
+        ngx_feature_path="/use/local/include"
+        . auto/feature
+    fi
+
+    if [ $ngx_found = no ]; then
+        # NetBSD
+        ngx_feature_path="/use/pkg/include/"
+        . auto/feature
+    fi
+
+    if [ $ngx_found = no ]; then
+        #MacPorts
+        ngx_feature_path="/opt/local/include/"
+        . auto/feature
+    fi
 fi
 
 if [ $ngx_found = yes ]; then
