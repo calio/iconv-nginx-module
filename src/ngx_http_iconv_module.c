@@ -183,7 +183,7 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         dd ("nncl is NULL");
         return NGX_OK;
     }
-    dd("pass to next body filter->\n%.*s", ncl->buf->last - ncl->buf->pos,
+    dd("pass to next body filter->\n%.*s", (int) (ncl->buf->last - ncl->buf->pos),
             ncl->buf->pos);
     return ngx_http_next_body_filter(r, nncl);
 }
@@ -326,7 +326,7 @@ ngx_http_do_iconv(ngx_http_request_t *r, ngx_chain_t **c, void *data, size_t len
         }
         cl->buf = b;
         rest = iconv_buf_size;
-        dd("convert:%.*s, first char:%x", len, (char *) data, *(unsigned int *)data);
+        dd("convert:%.*s, first char:%x", (int) len, (char *) data, *(unsigned int *)data);
 
         rv = iconv(cd, (char **) &data, &len, (char **) &b->last, &rest);
         /* E2BIG error is not considered*/
@@ -337,7 +337,7 @@ ngx_http_do_iconv(ngx_http_request_t *r, ngx_chain_t **c, void *data, size_t len
                 return NGX_ERROR;
             } else if (errno == EINVAL) {
                 cv += iconv_buf_size - rest;
-                dd("iconv error:EINVAL,len=%d cv=%d rest=%d", len, cv, rest);
+                dd("iconv error:EINVAL,len=%d cv=%d rest=%d", (int) len, (int) cv, (int) rest);
                 break;
             } else if (errno == E2BIG) {
                 dd("iconv error:E2BIG");
@@ -478,7 +478,7 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
 
     ilcf = ngx_http_get_module_loc_conf(r, ngx_http_iconv_module);
     iconv_buf_size = ilcf->buf_size;
-    dd("iconv_buf_size=%d", iconv_buf_size);
+    dd("iconv_buf_size=%d", (int) iconv_buf_size);
 
     src = ngx_palloc(r->pool, v[1].len + 1);
     if (src == NULL) {
@@ -511,7 +511,7 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
 
     for (cl = chain; cl; cl = cl->next) {
         buf = cl->buf;
-        dd("after convert, buf:%.*s", buf->last - buf->pos, buf->pos);
+        dd("after convert, buf:%.*s", (int) (buf->last - buf->pos), buf->pos);
         p = ngx_copy(p, buf->pos, buf->last - buf->pos);
     }
     dd("%.*s\n%.*s\n%.*s\n",v[0].len, v[0].data,v[1].len, v[1].data, v[2].len,
@@ -545,14 +545,14 @@ static char
     conf = child;
     prev = parent;
 
-    dd("before merge:conf->size=%d,prev->size=%d", conf->buf_size, prev->buf_size);
+    dd("before merge:conf->size=%d,prev->size=%d", (int) conf->buf_size, (int) prev->buf_size);
     if (conf->buf_size <= 1 || prev->buf_size <= 1) {
         ngx_log_error(NGX_LOG_ERR, cf->log, 0,
                 "iconv_buffer_size must not less than 2 bytes");
         return NGX_CONF_ERROR;
     }
     ngx_conf_merge_size_value(conf->buf_size, prev->buf_size, (size_t) 1024);
-    dd("after merge:conf->size=%d,prev->size=%d", conf->buf_size, prev->buf_size);
+    dd("after merge:conf->size=%d,prev->size=%d", (int) conf->buf_size, (int) prev->buf_size);
     ngx_conf_merge_value(conf->enabled, prev->enabled, 0);
     ngx_conf_merge_ptr_value(conf->from, (void *)prev->from, (char *) "utf-8");
     ngx_conf_merge_ptr_value(conf->to, (void *)prev->to, (char *) "gbk");
