@@ -19,7 +19,7 @@ __DATA__
 --- config
     location /foo {
         set $src '你好';
-        set_iconv $dst $src from=utf8 to=gbk;
+        set_iconv $dst $src from=utf-8 to=gbk;
         echo $dst;
     }
 --- request
