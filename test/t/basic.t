@@ -301,3 +301,23 @@ GET /foo
 --- charset: gbk
 --- response_body
 ???
+
+=== TEST 14
+--- config
+    location /foo {
+        #set_form_input $data;
+        proxy_pass $scheme://127.0.0.1:$server_port/bar;
+        #echo $data;
+    }
+    location /bar {
+        content_by_lua 'ngx.print("hello")';
+        iconv_filter from=utf-8 to=gbk;
+    }
+--- more_headers
+Content-Type: application/x-www-form-urlencoded
+--- request
+GET /foo
+--- charset: gbk
+--- response_body chop
+hello
+

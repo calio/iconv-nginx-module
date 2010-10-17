@@ -137,12 +137,18 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     ngx_http_iconv_ctx_t                *ctx;
     ngx_int_t                            rc;
 
+    if (r->http_version < NGX_HTTP_VERSION_11) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+            "iconv does not support HTTP 1.0 yet");
+        return ngx_http_next_body_filter(r, in);
+    }
+
     ilcf = ngx_http_get_module_loc_conf(r, ngx_http_iconv_module);
 
     if (ilcf->enabled) {
         dd("iconv filter enabled, from=%s to=%s", ilcf->from, ilcf->to);
     } else {
-        dd("iconv filter not enabled");
+        dd("XXX iconv filter not enabled");
         return ngx_http_next_body_filter(r, in);
     }
 
@@ -163,6 +169,7 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     }
 
     if (in == NULL) {
+        dd("XXX in is NULL");
         return ngx_http_next_body_filter(r, in);
     }
 
@@ -172,19 +179,31 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     }
 
     dd("discard previous chain link");
+
     ngx_http_iconv_discard_body(in);
+
     dd("start to convert");
+
     rc = ngx_http_iconv_filter_convert(ctx, ncl, &nncl);
+
     if (rc == NGX_ERROR) {
         dd("iconv convertion error");
         return NGX_ERROR;
     }
+
     if (nncl == NULL) {
         dd ("nncl is NULL");
         return NGX_OK;
     }
+
     dd("pass to next body filter->\n%.*s",
             (int) (ncl->buf->last - ncl->buf->pos), ncl->buf->pos);
+
+    dd("nncl: len: %d, sync: %d, last_buf: %d, flush: %d, next: %p",
+            (int) (nncl->buf->last - nncl->buf->pos),
+            nncl->buf->sync, nncl->buf->last_buf,
+            nncl->buf->flush, nncl->next);
+
     return ngx_http_next_body_filter(r, nncl);
 }
 
@@ -201,16 +220,23 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
     r = ctx->r;
 
     for (cl = in; cl; cl = cl->next) {
-        len += cl->buf->last - cl->buf->pos;
+        buf = cl->buf;
+        len += buf->last - buf->pos;
+        dd("len: %d", (int) len);
+        dd("sync: %d, last_buf: %d, flush: %d", buf->sync, buf->last_buf,
+                buf->flush);
     }
+
     len += ctx->uc.len;
     /* requires C99 */
-    dd("count buffer length:%zu", len);
+
+    dd("XXX count buffer length: %zu", len);
 
     ncl = ngx_alloc_chain_link(r->pool);
     if (ncl == NULL) {
         return NGX_ERROR;
     }
+
     buf = ngx_create_temp_buf(r->pool, len);
     if (buf == NULL) {
         return NGX_ERROR;
@@ -221,7 +247,9 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
         dd("copy unfinished character");
         buf->last = ngx_copy(buf->start, ctx->uc.data, ctx->uc.len);
     }
+
     dd("copy old chain link");
+
     for (cl = in; cl; cl = cl->next) {
         if (cl->buf->last > cl->buf->pos) {
             buf->last = ngx_copy(buf->last, cl->buf->pos, cl->buf->last -
@@ -576,8 +604,10 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
         dd("after convert, buf:%.*s", (int) (buf->last - buf->pos), buf->pos);
         p = ngx_copy(p, buf->pos, buf->last - buf->pos);
     }
+
     dd("%.*s\n%.*s\n%.*s\n",v[0].len, v[0].data,v[1].len, v[1].data, v[2].len,
             v[2].data);
+
     return NGX_OK;
 }
 
