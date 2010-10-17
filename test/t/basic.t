@@ -302,7 +302,9 @@ GET /foo
 --- response_body
 ???
 
-=== TEST 14
+
+
+=== TEST 15
 --- config
     location /foo {
         #set_form_input $data;
