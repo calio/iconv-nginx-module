@@ -223,24 +223,33 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
     }
     dd("copy old chain link");
     for (cl = in; cl; cl = cl->next) {
-        buf->last = ngx_copy(buf->last, cl->buf->pos, cl->buf->last -
-                cl->buf->pos);
+        if (cl->buf->last > cl->buf->pos) {
+            buf->last = ngx_copy(buf->last, cl->buf->pos, cl->buf->last -
+                    cl->buf->pos);
+        }
+
         if (cl->buf->sync) {
             buf->sync = 1;
         }
+
         if (cl->buf->flush) {
             buf->flush = 1;
         }
+
         if (cl->buf->in_file) {
-            dd("find in file buffer");
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                "iconv does not support in-file bufs");
+
             return NGX_ERROR;
         }
+
         if (cl->buf->last_buf) {
             dd("find last buf");
             buf->last_buf = 1;
             break;
         }
     }
+
     ncl->next = NULL;
     *out = ncl;
     return NGX_OK;
@@ -347,7 +356,7 @@ conv_begin:
                 }
                 if (errno == EILSEQ) {
                     ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                        "iconv error:EILSEQ");
+                        "iconv sees invalid character sequence (EILSEQ)");
                     if (len >= 1) {
                         if (rest == 0) {
                             dd("EILSEQ:rest=0");
