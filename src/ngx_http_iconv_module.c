@@ -137,15 +137,15 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     ngx_http_iconv_ctx_t                *ctx;
     ngx_int_t                            rc;
 
-    if (r->http_version < NGX_HTTP_VERSION_11) {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-            "iconv does not support HTTP 1.0 yet");
-        return ngx_http_next_body_filter(r, in);
-    }
-
     ilcf = ngx_http_get_module_loc_conf(r, ngx_http_iconv_module);
 
     if (ilcf->enabled) {
+        if (r->http_version < NGX_HTTP_VERSION_11) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                "iconv does not support HTTP 1.0 yet");
+            return ngx_http_next_body_filter(r, in);
+        }
+
         dd("iconv filter enabled, from=%s to=%s", ilcf->from, ilcf->to);
     } else {
         dd("XXX iconv filter not enabled");
