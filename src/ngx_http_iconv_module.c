@@ -383,7 +383,7 @@ conv_begin:
                     break;
                 }
                 if (errno == EILSEQ) {
-                    ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                    ngx_log_error(NGX_LOG_NOTICE, r->connection->log, 0,
                         "iconv sees invalid character sequence (EILSEQ)");
                     if (len >= 1) {
                         if (rest == 0) {
