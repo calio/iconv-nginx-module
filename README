@@ -33,11 +33,19 @@ Usage
     location /bar { iconv_filter from=utf-8 to=gbk; iconv_buffer_size 1k;
     #content handler here }
 
+Compatibility
+    The following versions of Nginx should work with this module:
+
+    *   0.8.x (last tested: 0.8.53)
+
+    *   0.7.x (last tested version is 0.7.67)
+
 Copyright & License
     This program is licenced under the BSD license.
 
     Copyright (c) 2010, Taobao Inc, Alibaba Group ( http://www.taobao.com/).
     Copyright (c) 2010, Calio <vipcalio@gmail.com>.
+    Copyright (c) 2010, Yichun Zhang (agentzh) <agentzh@gmail.com>.
 
     All rights reserved.
 
