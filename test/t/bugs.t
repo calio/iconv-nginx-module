@@ -27,3 +27,19 @@ GET /foo
 --- response_body
 你好
 
+
+
+=== TEST 2
+--- config
+    location /foo {
+        echo -n '你';
+        echo_flush;
+        echo '好';
+        iconv_filter from=utf8 to=gbk;
+    }
+--- request
+GET /foo
+--- charset: gbk
+--- response_body
+你好
+
