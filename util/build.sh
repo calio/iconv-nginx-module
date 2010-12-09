@@ -38,13 +38,15 @@ cd nginx-$version/
 
 if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$root/util/build.sh" -nt Makefile ]]; then
     ./configure --prefix=/opt/nginx \
+            --with-cc-opt='-O0' \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root/../ndk-nginx-module \
           --add-module=$root/../set-misc-nginx-module \
           --add-module=$root/../form-input-nginx-module \
           --add-module=$root/../lua-nginx-module \
+          --add-module=$root/../rds-json-nginx-module \
           --add-module=$root $opts \
-          --with-debug
+          --with-debug || exit 1
           #--add-module=$home/work/ngx_http_auth_request-0.1 #\
           #--with-rtsig_module
           #--with-cc-opt="-g3 -O0"

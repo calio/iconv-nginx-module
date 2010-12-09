@@ -147,6 +147,7 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         }
 
         dd("iconv filter enabled, from=%s to=%s", ilcf->from, ilcf->to);
+
     } else {
         dd("XXX iconv filter not enabled");
         return ngx_http_next_body_filter(r, in);
@@ -170,6 +171,11 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     if (in == NULL) {
         dd("XXX in is NULL");
+        return ngx_http_next_body_filter(r, in);
+    }
+
+    if (in->buf->last == in->buf->pos) {
+        dd("pass 0 size buf to next body filter");
         return ngx_http_next_body_filter(r, in);
     }
 
@@ -296,16 +302,25 @@ ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
     rest = 0;
     ilcf = ngx_http_get_module_loc_conf(ctx->r, ngx_http_iconv_module);
 
+    dd("XXX in->buf: %.*s",
+            (int) (in->buf->last - in->buf->pos),
+            in->buf->pos);
+
+    dd("XXX last buf: %d",
+            (int) in->buf->last_buf);
+
     if (in->buf->last - in->buf->pos) {
         rc = ngx_http_do_iconv(ctx->r, out, in->buf->pos, in->buf->last -
             in->buf->pos, ilcf->from, ilcf->to, NULL, &rest);
         if (in->buf->last_buf) {
-            for (cl = in; cl->next; cl = cl->next);
+            for (cl = *out; cl->next; cl = cl->next);
             cl->buf->last_buf = 1;
         }
+
     } else {
         *out = in;
     }
+
     dd("ilcf->to:%s", ilcf->to);
 
     dd("1");
@@ -314,11 +329,15 @@ ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
         if (ctx->uc.data == NULL) {
             return NGX_ERROR;
         }
+
         dd("2");
         dd("%p, %p, %zu", ctx->uc.data, in->buf->last, rest);
+
         ngx_memcpy(ctx->uc.data, in->buf->last - rest, rest);
+
         dd("3");
         ctx->uc.len = rest;
+
     } else {
         ctx->uc.data = NULL;
         ctx->uc.len = 0;
@@ -445,7 +464,14 @@ conv_done:
         *rest_bytes = len;
     }
     if (c) {
-        dd("chain:%p", chain);
+        dd("chain: %p", chain);
+
+        /* chain may be null */
+        /*
+        dd("conv done: chain buf: %.*s",
+                (int) (chain->buf->last - chain->buf->pos),
+                chain->buf->last);
+        */
         *c = chain;
     }
     dd("out");
