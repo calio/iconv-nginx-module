@@ -174,6 +174,11 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         return ngx_http_next_body_filter(r, in);
     }
 
+    if (in->buf->last == in->buf->pos) {
+        dd("pass 0 size buf to next body filter");
+        return ngx_http_next_body_filter(r, in);
+    }
+
     dd("create new chain link");
     if (ngx_http_iconv_merge_chain_link(ctx, in, &ncl) == NGX_ERROR) {
         return NGX_ERROR;
@@ -308,7 +313,7 @@ ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
         rc = ngx_http_do_iconv(ctx->r, out, in->buf->pos, in->buf->last -
             in->buf->pos, ilcf->from, ilcf->to, NULL, &rest);
         if (in->buf->last_buf) {
-            for (cl = in; cl->next; cl = cl->next);
+            for (cl = *out; cl->next; cl = cl->next);
             cl->buf->last_buf = 1;
         }
 
@@ -461,10 +466,12 @@ conv_done:
     if (c) {
         dd("chain: %p", chain);
 
+        /* chain may be null */
+        /*
         dd("conv done: chain buf: %.*s",
                 (int) (chain->buf->last - chain->buf->pos),
                 chain->buf->last);
-
+        */
         *c = chain;
     }
     dd("out");

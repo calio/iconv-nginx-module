@@ -24,8 +24,8 @@ __DATA__
 --- request
 GET /foo
 --- charset: gbk
---- response_body
-你好
+--- response_body eval
+"{\"errcode\":100,\"errstr\":\"你好\"}"
 
 
 
@@ -42,4 +42,3 @@ GET /foo
 --- charset: gbk
 --- response_body
 你好
-
