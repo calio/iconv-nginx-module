@@ -11,9 +11,9 @@ Installation
         Get the nginx source code from nginx.net (http://nginx.net/).
         Untar the source code and build nginx with this module.
 
-            $ wget 'http://sysoev.ru/nginx/nginx-0.8.28.tar.gz'
-            $ tar -xzvf nginx-0.8.28.tar.gz
-            $ cd nginx-0.8.28/
+            $ wget 'http://sysoev.ru/nginx/nginx-0.8.54.tar.gz'
+            $ tar -xzvf nginx-0.8.54.tar.gz
+            $ cd nginx-0.8.54/
 
             $ git-clone http://github.com/simpl-it/ngx_devel_kit.git
             $ git-clone http://github.com/calio/form-input-module.git
@@ -36,16 +36,20 @@ Usage
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   0.8.x (last tested: 0.8.53)
+    *   0.9.x (last tested: 0.9.4)
 
-    *   0.7.x (last tested version is 0.7.67)
+    *   0.8.x (last tested: 0.8.54)
+
+    *   0.7.x (last tested: 0.7.68)
 
 Copyright & License
     This program is licenced under the BSD license.
 
-    Copyright (c) 2010, Taobao Inc, Alibaba Group ( http://www.taobao.com/).
-    Copyright (c) 2010, Calio <vipcalio@gmail.com>.
-    Copyright (c) 2010, Yichun Zhang (agentzh) <agentzh@gmail.com>.
+    Copyright (c) 2010, 2011, Taobao Inc, Alibaba Group ( http://www.taobao.com/).
+
+    Copyright (c) 2010, 2011, Jiale "Calio" Zhi <vipcalio@gmail.com>.
+
+    Copyright (c) 2010, 2011, Yichun "agentzh" Zhang <agentzh@gmail.com>.
 
     All rights reserved.
 
