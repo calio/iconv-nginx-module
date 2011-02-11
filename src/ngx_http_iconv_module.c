@@ -356,10 +356,10 @@ ngx_http_do_iconv(ngx_http_request_t *r, ngx_chain_t **c, void *data,
         size_t len, u_char *from, u_char *to, size_t *conved_bytes,
         size_t *rest_bytes)
 {
-    iconv_t          cd;
-    ngx_chain_t     *cl, *chain, **ll;
+    iconv_t           cd;
+    ngx_chain_t      *cl, *chain, **ll;
     ngx_buf_t        *b;
-    size_t           cv, rest, rv;
+    size_t            cv, rest, rv;
 
     cv = 0;
     dd("iconv from=%s, to=%s", from, to);
@@ -393,7 +393,7 @@ conv_begin:
         dd("convert:%.*s, first char:%x", (int) len, data, data[0]);
 
         do {
-            rv = iconv(cd, (char **) &data, &len, (char **) &b->last, &rest);
+            rv = iconv(cd, (void *) &data, &len, (void *) &b->last, &rest);
 
             if (rv == (size_t) -1) {
                 if (errno == EINVAL) {
