@@ -11,6 +11,7 @@
 static ngx_int_t       iconv_buf_size;
 static ngx_int_t       max_iconv_bufs;
 
+
 typedef struct {
     size_t               buf_size;
     ngx_flag_t           enabled;
@@ -18,10 +19,12 @@ typedef struct {
     u_char              *to;
 } ngx_http_iconv_loc_conf_t;
 
+
 typedef struct {
     ngx_http_request_t      *r;
     ngx_str_t                uc; /* unfinished character */
 } ngx_http_iconv_ctx_t;
+
 
 static ngx_int_t ngx_http_iconv_filter_init(ngx_conf_t *cf);
 static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r);
@@ -369,6 +372,7 @@ ngx_http_do_iconv(ngx_http_request_t *r, ngx_chain_t **c, void *data,
 
     dd("len=%zu, iconv_buf_size=%zu", len, iconv_buf_size);
     ll = &chain;
+
 conv_begin:
     while (len) {
         cl = ngx_alloc_chain_link(r->pool);
@@ -382,13 +386,15 @@ conv_begin:
             iconv_close(cd);
             return NGX_ERROR;
         }
+
         cl->buf = b;
         rest = iconv_buf_size;
-        dd("convert:%.*s, first char:%x", (int) len, (char *) data,
-                *(unsigned int *)data);
+
+        dd("convert:%.*s, first char:%x", (int) len, data, data[0]);
 
         do {
             rv = iconv(cd, (char **) &data, &len, (char **) &b->last, &rest);
+
             if (rv == (size_t) -1) {
                 if (errno == EINVAL) {
                     cv += iconv_buf_size - rest;
@@ -396,14 +402,17 @@ conv_begin:
                         (int) cv, (int) rest);
                     goto conv_done;
                 }
+
                 if (errno == E2BIG) {
                     dd("E2BIG");
                     /* E2BIG error is not considered*/
                     break;
                 }
+
                 if (errno == EILSEQ) {
                     ngx_log_error(NGX_LOG_NOTICE, r->connection->log, 0,
                         "iconv sees invalid character sequence (EILSEQ)");
+
                     if (len >= 1) {
                         if (rest == 0) {
                             dd("EILSEQ:rest=0");
