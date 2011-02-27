@@ -273,13 +273,6 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
             buf->flush = 1;
         }
 
-        if (cl->buf->in_file) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                "iconv does not support in-file bufs");
-
-            return NGX_ERROR;
-        }
-
         if (cl->buf->last_buf) {
             dd("find last buf");
             buf->last_buf = 1;
