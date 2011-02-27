@@ -156,9 +156,19 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         return ngx_http_next_body_filter(r, in);
     }
 
+    if (in == NULL) {
+        dd("XXX in is NULL");
+        return ngx_http_next_body_filter(r, in);
+    }
+
+    if (in->buf->last == in->buf->pos) {
+        dd("pass 0 size buf to next body filter");
+        return ngx_http_next_body_filter(r, in);
+    }
+
     ctx = ngx_http_get_module_ctx(r, ngx_http_iconv_module);
     if (ctx == NULL) {
-        dd("create new contex");
+        dd("create new context");
         /*
          * set by ngx_pcalloc()
          *   ctx->uc->len = 0
@@ -170,16 +180,6 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         }
         ctx->r = r;
         ngx_http_set_ctx(r, ctx, ngx_http_iconv_module);
-    }
-
-    if (in == NULL) {
-        dd("XXX in is NULL");
-        return ngx_http_next_body_filter(r, in);
-    }
-
-    if (in->buf->last == in->buf->pos) {
-        dd("pass 0 size buf to next body filter");
-        return ngx_http_next_body_filter(r, in);
     }
 
     dd("create new chain link");
