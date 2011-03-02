@@ -1,4 +1,4 @@
-# vi:filetype=perl
+# vi:filetype=
 
 use lib 'lib';
 use Test::Nginx::Socket;
@@ -42,6 +42,8 @@ GET /foo
 --- charset: gbk
 --- response_body
 你好
+
+
 
 === TEST 3
 --- config
