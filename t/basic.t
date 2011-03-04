@@ -120,6 +120,7 @@ GET /foo?a=%e4&b=%bd&c=%a0&d=%e5&e=%a5&f=%bd
 你好
 
 
+
 === TEST 7
 --- config
     location /foo {

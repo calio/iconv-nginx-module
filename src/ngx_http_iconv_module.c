@@ -128,6 +128,10 @@ static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r)
     iconv_buf_size = ilcf->buf_size;
     r->filter_need_in_memory = 1;
 
+    if (ilcf->enabled && r->http_version >= NGX_HTTP_VERSION_11) {
+        ngx_http_clear_content_length(r);
+    }
+
     return ngx_http_next_header_filter(r);
 }
 
@@ -232,8 +236,10 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
         buf = cl->buf;
         len += buf->last - buf->pos;
         dd("len: %d", (int) len);
-        dd("sync: %d, last_buf: %d, flush: %d", buf->sync, buf->last_buf,
-                buf->flush);
+        dd("sync: %d, last_buf: %d, flush: %d, memory: %d, in-file: %d, temp: %d",
+                (int) buf->sync, (int) buf->last_buf,
+                (int) buf->flush, (int) buf->memory, (int) buf->in_file,
+                (int) buf->temporary);
     }
 
     len += ctx->uc.len;
@@ -273,9 +279,9 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
             buf->flush = 1;
         }
 
-        if (cl->buf->in_file) {
+        if (! ngx_buf_in_memory(cl->buf) && ! ngx_buf_special(cl->buf)) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                "iconv does not support in-file bufs");
+                "iconv only support in-memory bufs");
 
             return NGX_ERROR;
         }
@@ -389,8 +395,6 @@ conv_begin:
 
         cl->buf = b;
         rest = iconv_buf_size;
-
-        dd("convert:%.*s, first char:%x", (int) len, data, data[0]);
 
         do {
             rv = iconv(cd, (void *) &data, &len, (void *) &b->last, &rest);
