@@ -57,3 +57,4 @@ nginx
 pack
 all.sh
 t/servroot/
+buildroot/
