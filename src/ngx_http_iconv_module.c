@@ -281,7 +281,7 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
 
         if (! ngx_buf_in_memory(cl->buf) && ! ngx_buf_special(cl->buf)) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                "iconv only support in-memory bufs");
+                "ngx_iconv only supports in-memory bufs");
 
             return NGX_ERROR;
         }
