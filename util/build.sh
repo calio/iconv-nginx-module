@@ -6,6 +6,7 @@ root=`pwd`
 version=$1
 home=~
 #opts=$2
+target=$root/work/nginx
 
 if [ ! -d ./buildroot ]; then
     mkdir ./buildroot || exit 1
@@ -24,8 +25,9 @@ if [ ! -s "nginx-$version.tar.gz" ]; then
 fi
 
 #tar -xzvf nginx-$version.tar.gz || exit 1
-#cp $root/../no-pool-nginx/nginx-0.8.53-no_pool.patch ./
-#patch -p0 < nginx-0.8.53-no_pool.patch
+#cp $root/../no-pool-nginx/nginx-$version-no_pool.patch ./
+#patch -p0 < nginx-$version-no_pool.patch
+
 #patch -p0 < ~/work/nginx-$version-rewrite_phase_fix.patch || exit 1
 
 cd nginx-$version/
