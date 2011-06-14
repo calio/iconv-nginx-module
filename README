@@ -27,11 +27,19 @@ Usage
         iconv_buffer_size <size>;   #default iconv_buffer_size is ngx_pagesize
         iconv_filter from=<from encoding> to=<to encoding>;
 
-    Here is a basic example: #nginx.conf location /foo { set $src '你好'; #in
-    UTF-8 set_iconv $dst $src from=utf8 to=gbk; #now $dst holds 你好 in GBK }
-    #everything generated from /foo will be converted from utf8 to gbk
-    location /bar { iconv_filter from=utf-8 to=gbk; iconv_buffer_size 1k;
-    #content handler here }
+    Here is a basic example:
+        #nginx.conf
+        location /foo {
+            set $src '你好'; #in UTF-8
+            set_iconv $dst $src from=utf8 to=gbk; #now $dst holds 你好 in GBK
+        }
+
+        #everything generated from /bar will be converted from utf8 to gbk
+        location /bar {
+            iconv_filter from=utf-8 to=gbk;
+            iconv_buffer_size 1k;
+            #content handler here
+        }
 
 Compatibility
     The following versions of Nginx should work with this module:
