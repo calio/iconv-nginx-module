@@ -55,5 +55,8 @@ src/foreach.h
 src/handler.c
 nginx
 pack
-all.sh
+all
 t/servroot/
+buildroot/
+go
+build10
