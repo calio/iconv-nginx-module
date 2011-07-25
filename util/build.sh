@@ -37,11 +37,11 @@ if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$
           --with-cc-opt='-O3' \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root/../ndk-nginx-module \
+          --add-module=$root $opts \
           --add-module=$root/../set-misc-nginx-module \
           --add-module=$root/../form-input-nginx-module \
           --add-module=$root/../lua-nginx-module \
           --add-module=$root/../rds-json-nginx-module \
-          --add-module=$root $opts \
           || exit 1
           #--with-debug || exit 1
           #--add-module=$home/work/ngx_http_auth_request-0.1 #\
