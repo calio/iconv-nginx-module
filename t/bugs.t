@@ -15,7 +15,7 @@ run_tests();
 
 __DATA__
 
-=== TEST 1
+=== TEST 1 :used with rds_json
 --- config
     location /foo {
         rds_json_ret 100 '你好';
@@ -29,7 +29,7 @@ GET /foo
 
 
 
-=== TEST 2
+=== TEST 2 :content in buf than set flush flag
 --- config
     location /foo {
         echo -n '你';
@@ -45,7 +45,7 @@ GET /foo
 
 
 
-=== TEST 3
+=== TEST 3 :iconv used with local file
 --- config
     location /data.txt {
         iconv_filter from=utf8 to=gbk;

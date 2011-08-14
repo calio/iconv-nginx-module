@@ -15,7 +15,7 @@ run_tests();
 
 __DATA__
 
-=== TEST 1
+=== TEST 1 :basic convertion
 --- config
     location /foo {
         set $src '你好';
@@ -30,7 +30,7 @@ GET /foo
 
 
 
-=== TEST 2
+=== TEST 2 :more complex convertion
 --- config
     location /foo {
         set $src '淘宝网 - 亚洲最大、最安全的网上交易平台，提供各类服饰、美容、家居、数码、话费/点卡充值… 2亿优质特价商品，同时提供担保交易(先收货后付款)、先行赔付、假一赔三、七天无理由退换货、数码免费维修等安全交易保障服务，让你全面安心享受网上购物乐趣！';
@@ -45,7 +45,7 @@ GET /foo
 
 
 
-=== TEST 3
+=== TEST 3 :large iconv_buffer_size
 --- config
     location /foo {
         set $src '你好';
@@ -61,7 +61,7 @@ GET /foo
 
 
 
-=== TEST 4
+=== TEST 4 :iconv content filter
 --- config
     location /foo {
         iconv_filter from=utf-8 to=GBK;
@@ -75,7 +75,7 @@ GET /foo
 
 
 
-=== TEST 5
+=== TEST 5 :content in multi buf
 --- config
     location /foo {
         iconv_filter from=utf-8 to=GBK;
@@ -96,7 +96,7 @@ GET /foo?a=你&b=好&c=世&d=界
 
 
 
-=== TEST 6
+=== TEST 6 :content in multi buf
 --- config
     location /foo {
         iconv_filter from=utf-8 to=GBK;
@@ -121,9 +121,9 @@ GET /foo?a=%e4&b=%bd&c=%a0&d=%e5&e=%a5&f=%bd
 
 
 
-=== TEST 7
+=== TEST 7 :content in multi buf
 --- config
-    location /foo {
+location /foo {
         iconv_filter from=utf-8 to=GBK;
         iconv_buffer_size 1k;
         set_unescape_uri $a $arg_a;
@@ -147,7 +147,7 @@ GET /foo?a=%e4&b=%bd&c=%a0&d=%e5&e=%a5&f=%bd
 
 
 
-=== TEST 8
+=== TEST 8 :some complex text
 --- config
     location /foo {
         iconv_filter from=utf-8 to=gbk;
@@ -229,7 +229,7 @@ GET /foo
 
 
 
-=== TEST 10
+=== TEST 10 :text that can't be converted, buffer size smaller than content
 --- config
     location /foo {
         iconv_filter from=utf-8 to=gbk;
@@ -244,7 +244,7 @@ GET /foo
 
 
 
-=== TEST 11
+=== TEST 11 :text that can't be converted, buffer size smaller than content
 --- config
     location /foo {
         iconv_filter from=utf-8 to=gbk;
@@ -259,7 +259,7 @@ GET /foo
 
 
 
-=== TEST 12
+=== TEST 12 :text that can't be converted, buffer size smaller than content
 --- config
     location /foo {
         iconv_filter from=utf-8 to=gbk;
@@ -274,7 +274,7 @@ GET /foo
 
 
 
-=== TEST 13
+=== TEST 13 :text that can't be converted, buffer size equals content
 --- config
     location /foo {
         iconv_filter from=utf-8 to=gbk;
@@ -289,7 +289,7 @@ GET /foo
 
 
 
-=== TEST 14
+=== TEST 14 :text that can't be converted, buffer size larger than content
 --- config
     location /foo {
         iconv_filter from=utf-8 to=gbk;
@@ -304,7 +304,7 @@ GET /foo
 
 
 
-=== TEST 15
+=== TEST 15 :iconv_filter used with proxy_pass
 --- config
     location /foo {
         #set_form_input $data;
