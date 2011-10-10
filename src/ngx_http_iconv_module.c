@@ -323,7 +323,7 @@ ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
             in->buf->pos, ilcf->from, ilcf->to, NULL, &rest);
         if (rc != NGX_OK) {
             ngx_log_error(NGX_LOG_ERR, ctx->r->connection->log, 0,
-                    "convert error from ngx_http_co_iconv");
+                    "convert error from ngx_http_do_iconv");
             return rc;
         }
 
