@@ -1,4 +1,4 @@
-if echo $HTTP_MODULES | grep " ndk_http_module" > /dev/null; then
+if echo $HTTP_MODULES | grep " ndk_http_module\| ngx_http_devel_kit_module" > /dev/null; then
     echo "found ngx_devel_kit for ngx_iconv; looks good."
 else
     echo "error: ngx_devel_kit is required to build ngx_iconv; please put it before ngx_iconv." 1>&2

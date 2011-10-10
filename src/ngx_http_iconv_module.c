@@ -321,6 +321,12 @@ ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
     if (in->buf->last - in->buf->pos) {
         rc = ngx_http_do_iconv(ctx->r, out, in->buf->pos, in->buf->last -
             in->buf->pos, ilcf->from, ilcf->to, NULL, &rest);
+        if (rc != NGX_OK) {
+            ngx_log_error(NGX_LOG_ERR, ctx->r->connection->log, 0,
+                    "convert error from ngx_http_co_iconv");
+            return rc;
+        }
+
         if (in->buf->last_buf) {
             for (cl = *out; cl->next; cl = cl->next);
             cl->buf->last_buf = 1;
