@@ -8,33 +8,45 @@ Description
     This module depends on the ngx_devel_kit(NDK) module.
 
 Installation
-        Get the nginx source code from nginx.net (http://nginx.net/).
+        Get the nginx source code from nginx.net ( http://nginx.org/ ).
         Untar the source code and build nginx with this module.
 
-            $ wget 'http://sysoev.ru/nginx/nginx-0.8.54.tar.gz'
-            $ tar -xzvf nginx-0.8.54.tar.gz
-            $ cd nginx-0.8.54/
+            wget 'http://nginx.org/download/nginx-1.0.8.tar.gz'
+            tar -xzvf nginx-1.0.8.tar.gz
+            cd nginx-1.0.8/
 
-            $ git-clone http://github.com/simpl-it/ngx_devel_kit.git
-            $ git-clone http://github.com/calio/form-input-module.git
+            ./configure \
+                    --add-module=/path/to/iconv-nginx-module/ \
+                    --add-module=/path/to/ngx_devel_kit
 
-            $ ./configure --add-module=/somepath/iconv-nginx-module/ --add-module=/somepath/ngx_devel_kit
-            $ make -j2
-            $ make install
+            make -j2
+            make install
 
 Usage
         set_iconv <destination variable> <from variable> from=<from encoding> to=<to encoding>;
         iconv_buffer_size <size>;   #default iconv_buffer_size is ngx_pagesize
         iconv_filter from=<from encoding> to=<to encoding>;
 
-    Here is a basic example: #nginx.conf location /foo { set $src '你好'; #in
-    UTF-8 set_iconv $dst $src from=utf8 to=gbk; #now $dst holds 你好 in GBK }
-    #everything generated from /foo will be converted from utf8 to gbk
-    location /bar { iconv_filter from=utf-8 to=gbk; iconv_buffer_size 1k;
-    #content handler here }
+    Here is a basic example:
+        #nginx.conf
+        location /foo {
+            set $src '你好'; #in UTF-8
+            set_iconv $dst $src from=utf8 to=gbk; #now $dst holds 你好 in GBK
+        }
+
+        #everything generated from /bar will be converted from utf8 to gbk
+        location /bar {
+            iconv_filter from=utf-8 to=gbk;
+            iconv_buffer_size 1k;
+            #content handler here
+        }
 
 Compatibility
     The following versions of Nginx should work with this module:
+
+    *   1.1.x (last tested: 1.1.5)
+
+    *   1.0.x (last tested: 1.0.8)
 
     *   0.9.x (last tested: 0.9.4)
 
