@@ -59,4 +59,4 @@ all
 t/servroot/
 buildroot/
 go
-build10
+build1[01]
