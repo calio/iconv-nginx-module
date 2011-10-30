@@ -198,6 +198,9 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     }
 
     dd("create new chain link");
+
+    ctx = ngx_http_get_module_ctx(r, ngx_http_iconv_module);
+
     if (ngx_http_iconv_merge_chain_link(ctx, in, &ncl) == NGX_ERROR) {
         return NGX_ERROR;
     }
