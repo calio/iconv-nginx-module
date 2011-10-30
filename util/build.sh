@@ -11,9 +11,9 @@ ngx-build $force $version \
           --with-cc-opt='-O3' \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root/../ndk-nginx-module \
+          --add-module=$root/../lua-nginx-module \
           --add-module=$root/../set-misc-nginx-module \
           --add-module=$root/../form-input-nginx-module \
-          --add-module=$root/../lua-nginx-module \
           --add-module=$root/../rds-json-nginx-module \
           --add-module=$root $opts \
           || exit 1

@@ -8,13 +8,15 @@
 #include <ngx_http.h>
 
 
-static ngx_int_t       iconv_buf_size;
-static ngx_int_t       max_iconv_bufs;
+static ngx_int_t        iconv_buf_size;
+static ngx_int_t        max_iconv_bufs;
 
+static ngx_uint_t       ngx_http_iconv_filter_used = 0;
 
 typedef struct {
     size_t               buf_size;
     ngx_flag_t           enabled;
+    ngx_flag_t           skip_body_filter;
     u_char              *from;
     u_char              *to;
 } ngx_http_iconv_loc_conf_t;
@@ -26,6 +28,7 @@ typedef struct {
 } ngx_http_iconv_ctx_t;
 
 
+static ngx_int_t ngx_http_iconv_filter_pre(ngx_conf_t *cf);
 static ngx_int_t ngx_http_iconv_filter_init(ngx_conf_t *cf);
 static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r);
 static ngx_int_t ngx_http_iconv_body_filter(ngx_http_request_t *r,
@@ -79,7 +82,7 @@ static ngx_command_t ngx_http_iconv_commands[] = {
 
 
 static ngx_http_module_t ngx_http_iconv_module_ctx = {
-    NULL,                               /* preconfiguration */
+    ngx_http_iconv_filter_pre,          /* preconfiguration */
     ngx_http_iconv_filter_init,         /* postconfiguration */
     NULL,                               /* create main configuration */
     NULL,                               /* init main configuration */
@@ -110,12 +113,21 @@ static ngx_http_output_header_filter_pt ngx_http_next_header_filter;
 static ngx_http_output_body_filter_pt   ngx_http_next_body_filter;
 
 
+static ngx_int_t ngx_http_iconv_filter_pre(ngx_conf_t *cf)
+{
+    ngx_http_iconv_filter_used  = 0;
+    return NGX_OK;
+}
+
 static ngx_int_t ngx_http_iconv_filter_init(ngx_conf_t *cf)
 {
-    ngx_http_next_header_filter = ngx_http_top_header_filter;
-    ngx_http_top_header_filter = ngx_http_iconv_header_filter;
-    ngx_http_next_body_filter = ngx_http_top_body_filter;
-    ngx_http_top_body_filter = ngx_http_iconv_body_filter;
+    if (ngx_http_iconv_filter_used) {
+        ngx_http_next_header_filter = ngx_http_top_header_filter;
+        ngx_http_top_header_filter = ngx_http_iconv_header_filter;
+        ngx_http_next_body_filter = ngx_http_top_body_filter;
+        ngx_http_top_body_filter = ngx_http_iconv_body_filter;
+    }
+
     return NGX_OK;
 }
 
@@ -123,6 +135,7 @@ static ngx_int_t ngx_http_iconv_filter_init(ngx_conf_t *cf)
 static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r)
 {
     ngx_http_iconv_loc_conf_t       *ilcf;
+    ngx_http_iconv_ctx_t            *ctx;
 
     ilcf = ngx_http_get_module_loc_conf(r, ngx_http_iconv_module);
     iconv_buf_size = ilcf->buf_size;
@@ -130,44 +143,6 @@ static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r)
 
     if (ilcf->enabled && r->http_version >= NGX_HTTP_VERSION_11) {
         ngx_http_clear_content_length(r);
-    }
-
-    return ngx_http_next_header_filter(r);
-}
-
-
-static ngx_int_t
-ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
-{
-    ngx_http_iconv_loc_conf_t           *ilcf;
-    ngx_chain_t                         *ncl, *nncl;
-    ngx_http_iconv_ctx_t                *ctx;
-    ngx_int_t                            rc;
-
-    ilcf = ngx_http_get_module_loc_conf(r, ngx_http_iconv_module);
-
-    if (ilcf->enabled) {
-        if (r->http_version < NGX_HTTP_VERSION_11) {
-            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                "iconv does not support HTTP 1.0 yet");
-            return ngx_http_next_body_filter(r, in);
-        }
-
-        dd("iconv filter enabled, from=%s to=%s", ilcf->from, ilcf->to);
-
-    } else {
-        dd("XXX iconv filter not enabled");
-        return ngx_http_next_body_filter(r, in);
-    }
-
-    if (in == NULL) {
-        dd("XXX in is NULL");
-        return ngx_http_next_body_filter(r, in);
-    }
-
-    if (in->buf->last == in->buf->pos) {
-        dd("pass 0 size buf to next body filter");
-        return ngx_http_next_body_filter(r, in);
     }
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_iconv_module);
@@ -184,6 +159,42 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
         }
         ctx->r = r;
         ngx_http_set_ctx(r, ctx, ngx_http_iconv_module);
+    }
+
+    if (r->http_version < NGX_HTTP_VERSION_11) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+            "iconv does not support HTTP 1.0 yet");
+        ilcf->skip_body_filter = 1;
+    }
+
+    return ngx_http_next_header_filter(r);
+}
+
+
+static ngx_int_t
+ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
+{
+    ngx_http_iconv_loc_conf_t           *ilcf;
+    ngx_chain_t                         *ncl, *nncl;
+    ngx_http_iconv_ctx_t                *ctx;
+    ngx_int_t                            rc;
+
+    ilcf = ngx_http_get_module_loc_conf(r, ngx_http_iconv_module);
+
+    if (ilcf->skip_body_filter) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+            "iconv body filter skiped");
+        return ngx_http_next_body_filter(r, in);
+    }
+
+    if (in == NULL) {
+        dd("XXX in is NULL");
+        return ngx_http_next_body_filter(r, in);
+    }
+
+    if (in->buf->last == in->buf->pos) {
+        dd("pass 0 size buf to next body filter");
+        return ngx_http_next_body_filter(r, in);
     }
 
     dd("create new chain link");
@@ -518,6 +529,8 @@ ngx_http_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     u_char                      *p;
     size_t                       tl;
     ilcf = conf;
+
+    ngx_http_iconv_filter_used = 1;
 
     ilcf->enabled = 1;
     value = cf->args->elts;
