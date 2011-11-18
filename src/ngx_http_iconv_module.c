@@ -236,7 +236,8 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
         buf = cl->buf;
         len += buf->last - buf->pos;
         dd("len: %d", (int) len);
-        dd("sync: %d, last_buf: %d, flush: %d, memory: %d, in-file: %d, temp: %d",
+        dd("sync: %d, last_buf: %d, flush: %d, memory: %d, in-file: %d,
+                temp: %d",
                 (int) buf->sync, (int) buf->last_buf,
                 (int) buf->flush, (int) buf->memory, (int) buf->in_file,
                 (int) buf->temporary);
@@ -689,7 +690,8 @@ static char
                 "iconv_buffer_size must not less than 2 bytes");
         return NGX_CONF_ERROR;
     }
-    ngx_conf_merge_size_value(conf->buf_size, prev->buf_size, (size_t) ngx_pagesize);
+    ngx_conf_merge_size_value(conf->buf_size, prev->buf_size,
+            (size_t) ngx_pagesize);
     dd("after merge:conf->size=%d,prev->size=%d", (int) conf->buf_size,
             (int) prev->buf_size);
     ngx_conf_merge_value(conf->enabled, prev->enabled, 0);
