@@ -7,7 +7,7 @@ use Test::Nginx::Socket;
 
 plan tests => repeat_each() * 2 * blocks();
 
-#no_long_string();
+no_long_string();
 
 run_tests();
 
@@ -307,19 +307,47 @@ GET /foo
 === TEST 15 :iconv_filter used with proxy_pass
 --- config
     location /foo {
-        #set_form_input $data;
         proxy_pass $scheme://127.0.0.1:$server_port/bar;
-        #echo $data;
     }
     location /bar {
-        content_by_lua 'ngx.print("hello")';
+        content_by_lua 'ngx.print("这是一段文本")';
         iconv_filter from=utf-8 to=gbk;
     }
---- more_headers
-Content-Type: application/x-www-form-urlencoded
 --- request
 GET /foo
 --- charset: gbk
 --- response_body chop
-hello
+这是一段文本
 
+
+=== TEST 16 :iconv content filter / HTTP 1.0
+--- config
+    location /foo {
+        iconv_filter from=utf-8 to=GBK;
+        echo '你好';
+    }
+--- request
+GET /foo HTTP/1.0
+--- charset: gbk
+--- response_body
+你好
+
+
+
+=== TEST 17 :iconv used together with proxy
+--- config
+    location /data.txt {
+        iconv_filter from=utf8 to=gbk;
+    }
+    location /proxy {
+        proxy_pass $scheme://127.0.0.1:$server_port/data.txt;
+    }
+--- user_files
+>>> data.txt
+你好
+--- request
+GET /proxy
+--- charset: gbk
+--- response_body
+你好
+--- ONLY
