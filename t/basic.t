@@ -7,7 +7,7 @@ use Test::Nginx::Socket;
 
 plan tests => repeat_each() * 2 * blocks();
 
-no_long_string();
+#no_long_string();
 
 run_tests();
 
@@ -350,4 +350,3 @@ GET /proxy
 --- charset: gbk
 --- response_body
 你好
---- ONLY
