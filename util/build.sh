@@ -7,6 +7,7 @@ version=$1
 home=~
 force=$2
 
+         #--with-cc="gcc46" \
 ngx-build $force $version \
           --with-cc-opt='-O3' \
           --add-module=$root/../echo-nginx-module \
@@ -16,6 +17,7 @@ ngx-build $force $version \
           --add-module=$root/../form-input-nginx-module \
           --add-module=$root/../rds-json-nginx-module \
           --add-module=$root $opts \
+            --with-debug
           || exit 1
           #--with-debug || exit 1
           #--add-module=$home/work/ngx_http_auth_request-0.1 #\
