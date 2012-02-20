@@ -17,7 +17,7 @@ ngx-build $force $version \
           --add-module=$root/../form-input-nginx-module \
           --add-module=$root/../rds-json-nginx-module \
           --add-module=$root $opts \
-            --with-debug
+            --with-debug \
           || exit 1
           #--with-debug || exit 1
           #--add-module=$home/work/ngx_http_auth_request-0.1 #\
