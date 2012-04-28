@@ -9,7 +9,7 @@ force=$2
 
          #--with-cc="gcc46" \
 ngx-build $force $version \
-          --with-cc-opt='-O3' \
+          --with-cc-opt='-O0' \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root/../ndk-nginx-module \
           --add-module=$root/../lua-nginx-module \
