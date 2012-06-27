@@ -320,6 +320,7 @@ GET /foo
 这是一段文本
 
 
+
 === TEST 16 :iconv content filter / HTTP 1.0
 --- config
     location /foo {
@@ -352,6 +353,7 @@ GET /proxy
 你好
 
 
+
 === TEST 18 :iconv_filter used with proxy_pass
 --- config
     location /foo {
@@ -367,3 +369,26 @@ GET /foo
 --- response_body chop
 这是一段文本
 
+
+
+=== TEST 19 :iconv_filter used with proxy_pass
+--- config
+    location /main {
+        content_by_lua '
+            local res = ngx.location.capture("/foo")
+            ngx.print(res.body)
+        ';
+    }
+    location /foo {
+        proxy_pass $scheme://127.0.0.1:$server_port/bar;
+        iconv_filter from=utf-8 to=gbk;
+    }
+
+    location /bar {
+        content_by_lua 'ngx.print("这是一段文本")';
+    }
+--- request
+GET /main
+--- charset: gbk
+--- response_body chop
+这是一段文本
