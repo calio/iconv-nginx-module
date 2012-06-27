@@ -350,3 +350,20 @@ GET /proxy
 --- charset: gbk
 --- response_body
 你好
+
+
+=== TEST 18 :iconv_filter used with proxy_pass
+--- config
+    location /foo {
+        proxy_pass $scheme://127.0.0.1:$server_port/bar;
+        iconv_filter from=utf-8 to=gbk;
+    }
+    location /bar {
+        content_by_lua 'ngx.print("这是一段文本")';
+    }
+--- request
+GET /foo
+--- charset: gbk
+--- response_body chop
+这是一段文本
+
