@@ -380,8 +380,8 @@ GET /foo
         ';
     }
     location /foo {
-        proxy_pass $scheme://127.0.0.1:$server_port/bar;
         iconv_filter from=utf-8 to=gbk;
+        proxy_pass $scheme://127.0.0.1:$server_port/bar;
     }
 
     location /bar {
