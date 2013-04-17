@@ -16,8 +16,8 @@ Installation
             cd nginx-1.0.8/
 
             ./configure \
-                    --add-module=/path/to/iconv-nginx-module/ \
-                    --add-module=/path/to/ngx_devel_kit
+                    --add-module=/path/to/ngx_devel_kit \
+                    --add-module=/path/to/iconv-nginx-module
 
             make -j2
             make install

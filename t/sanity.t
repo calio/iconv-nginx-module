@@ -392,3 +392,25 @@ GET /main
 --- charset: gbk
 --- response_body chop
 这是一段文本
+
+
+
+=== TEST 20 :iconv_filter used with proxy_pass
+--- config
+    location /foo {
+        #set_form_input $data;
+        proxy_pass $scheme://127.0.0.1:$server_port/bar;
+        proxy_http_version 1.0;
+        #echo $data;
+    }
+    location /bar {
+        echo -n "你好";
+        iconv_filter from=utf-8 to=gbk;
+    }
+--- more_headers
+Content-Type: application/x-www-form-urlencoded
+--- request
+GET /foo
+--- charset: gbk
+--- response_body chop
+你好
