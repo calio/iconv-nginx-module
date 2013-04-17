@@ -9,6 +9,7 @@ force=$2
 
          #--with-cc="gcc46" \
 ngx-build $force $version \
+          --with-ld-opt="-L$PCRE_LIB -Wl,-rpath,$PCRE_LIB:$LUAJIT_LIB:/usr/local/lib" \
           --with-cc-opt='-O0' \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root/../ndk-nginx-module \
