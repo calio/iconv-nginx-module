@@ -3,6 +3,7 @@
 #endif
 #include "ddebug.h"
 
+
 #include <ndk.h>
 #include <iconv.h>
 #include <ngx_config.h>
@@ -13,7 +14,9 @@
 static ngx_int_t        iconv_buf_size;
 static ngx_int_t        max_iconv_bufs;
 
+
 static ngx_uint_t       ngx_http_iconv_filter_used = 0;
+
 
 typedef struct {
     size_t               buf_size;
@@ -34,23 +37,23 @@ static ngx_int_t ngx_http_iconv_filter_pre(ngx_conf_t *cf);
 static ngx_int_t ngx_http_iconv_filter_init(ngx_conf_t *cf);
 static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r);
 static ngx_int_t ngx_http_iconv_body_filter(ngx_http_request_t *r,
-        ngx_chain_t *in);
+    ngx_chain_t *in);
 static ngx_int_t ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx,
-        ngx_chain_t *in, ngx_chain_t **out);
+    ngx_chain_t *in, ngx_chain_t **out);
 static ngx_int_t ngx_http_do_iconv(ngx_http_request_t *r, ngx_chain_t **c,
-        void *data, size_t len, u_char *from, u_char *to, size_t *conv_bytes,
-        size_t *rest_bytes);
+    void *data, size_t len, u_char *from, u_char *to, size_t *conv_bytes,
+    size_t *rest_bytes);
 static ngx_int_t ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx,
-        ngx_chain_t *in, ngx_chain_t **out);
+    ngx_chain_t *in, ngx_chain_t **out);
 static char *ngx_http_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd,
-        void *conf);
+    void *conf);
 static char *ngx_http_set_iconv_conf_handler(ngx_conf_t *cf,
-        ngx_command_t *cmd, void *conf);
+    ngx_command_t *cmd, void *conf);
 static ngx_int_t ngx_http_set_iconv_handler(ngx_http_request_t *r,
-        ngx_str_t *res, ngx_http_variable_value_t *v);
+    ngx_str_t *res, ngx_http_variable_value_t *v);
 static void *ngx_http_iconv_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_iconv_merge_loc_conf(ngx_conf_t *cf, void *parent,
-        void *child);
+    void *child);
 static void ngx_http_iconv_discard_body(ngx_chain_t *in);
 
 
@@ -161,7 +164,9 @@ static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r)
         if (ctx == NULL) {
             return NGX_ERROR;
         }
+
         ctx->r = r;
+
         ngx_http_set_ctx(r, ctx, ngx_http_iconv_module);
     }
 
@@ -171,7 +176,7 @@ static ngx_int_t ngx_http_iconv_header_filter(ngx_http_request_t *r)
 
     if (r->http_version < NGX_HTTP_VERSION_10) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-            "iconv does not support HTTP < 1.0 yet");
+                      "iconv does not support HTTP < 1.0 yet");
         ilcf->skip_body_filter = 1;
     }
 
@@ -195,7 +200,7 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
     if (ilcf->skip_body_filter) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-            "iconv body filter skiped");
+                      "iconv body filter skiped");
         return ngx_http_next_body_filter(r, in);
     }
 
@@ -236,12 +241,12 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
     }
 
     dd("pass to next body filter->\n%.*s",
-            (int) (ncl->buf->last - ncl->buf->pos), ncl->buf->pos);
+       (int) (ncl->buf->last - ncl->buf->pos), ncl->buf->pos);
 
     dd("nncl: len: %d, sync: %d, last_buf: %d, flush: %d, next: %p",
-            (int) (nncl->buf->last - nncl->buf->pos),
-            nncl->buf->sync, nncl->buf->last_buf,
-            nncl->buf->flush, nncl->next);
+       (int) (nncl->buf->last - nncl->buf->pos),
+       nncl->buf->sync, nncl->buf->last_buf,
+       nncl->buf->flush, nncl->next);
 
     return ngx_http_next_body_filter(r, nncl);
 }
@@ -249,7 +254,7 @@ ngx_http_iconv_body_filter(ngx_http_request_t *r, ngx_chain_t *in)
 
 static ngx_int_t
 ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
-        ngx_chain_t **out)
+    ngx_chain_t **out)
 {
     ngx_chain_t             *cl, *ncl;
     ngx_http_request_t      *r;
@@ -261,12 +266,12 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
     for (cl = in; cl; cl = cl->next) {
         buf = cl->buf;
         len += buf->last - buf->pos;
+
         dd("len: %d", (int) len);
-        dd("sync: %d, last_buf: %d, flush: %d, memory: %d, in-file: %d,"
-                "temp: %d",
-                (int) buf->sync, (int) buf->last_buf,
-                (int) buf->flush, (int) buf->memory, (int) buf->in_file,
-                (int) buf->temporary);
+        dd("sync: %d, last_buf: %d, flush: %d, memory: %d, in-file: %d, "
+           "temp: %d", (int) buf->sync, (int) buf->last_buf,
+           (int) buf->flush, (int) buf->memory, (int) buf->in_file,
+           (int) buf->temporary);
     }
 
     len += ctx->uc.len;
@@ -294,8 +299,8 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
 
     for (cl = in; cl; cl = cl->next) {
         if (cl->buf->last > cl->buf->pos) {
-            buf->last = ngx_copy(buf->last, cl->buf->pos, cl->buf->last -
-                    cl->buf->pos);
+            buf->last = ngx_copy(buf->last, cl->buf->pos,
+                                 cl->buf->last - cl->buf->pos);
         }
 
         if (cl->buf->sync) {
@@ -306,9 +311,9 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
             buf->flush = 1;
         }
 
-        if (! ngx_buf_in_memory(cl->buf) && ! ngx_buf_special(cl->buf)) {
+        if (!ngx_buf_in_memory(cl->buf) && !ngx_buf_special(cl->buf)) {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                "ngx_iconv only supports in-memory bufs");
+                          "ngx_iconv only supports in-memory bufs");
 
             return NGX_ERROR;
         }
@@ -328,7 +333,7 @@ ngx_http_iconv_merge_chain_link(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
 
 static ngx_int_t
 ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
-        ngx_chain_t **out)
+    ngx_chain_t **out)
 {
     ngx_http_iconv_loc_conf_t   *ilcf;
     size_t                       rest;
@@ -339,23 +344,26 @@ ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
     ilcf = ngx_http_get_module_loc_conf(ctx->r, ngx_http_iconv_module);
 
     dd("XXX in->buf: %.*s",
-            (int) (in->buf->last - in->buf->pos),
-            in->buf->pos);
+       (int) (in->buf->last - in->buf->pos),
+       in->buf->pos);
 
     dd("XXX last buf: %d",
-            (int) in->buf->last_buf);
+       (int) in->buf->last_buf);
 
     if (in->buf->last - in->buf->pos) {
-        rc = ngx_http_do_iconv(ctx->r, out, in->buf->pos, in->buf->last -
-            in->buf->pos, ilcf->from, ilcf->to, NULL, &rest);
+        rc = ngx_http_do_iconv(ctx->r, out, in->buf->pos,
+                               in->buf->last - in->buf->pos, ilcf->from,
+                               ilcf->to, NULL, &rest);
         if (rc != NGX_OK) {
             ngx_log_error(NGX_LOG_ERR, ctx->r->connection->log, 0,
-                    "convert error from ngx_http_do_iconv");
+                          "convert error from ngx_http_do_iconv");
             return rc;
         }
 
         if (in->buf->last_buf) {
-            for (cl = *out; cl->next; cl = cl->next);
+            for (cl = *out; cl->next; cl = cl->next) {
+                /* do nothing */
+            }
             cl->buf->last_buf = 1;
         }
 
@@ -388,8 +396,8 @@ ngx_http_iconv_filter_convert(ngx_http_iconv_ctx_t *ctx, ngx_chain_t *in,
 
 static ngx_int_t
 ngx_http_do_iconv(ngx_http_request_t *r, ngx_chain_t **c, void *data,
-        size_t len, u_char *from, u_char *to, size_t *conved_bytes,
-        size_t *rest_bytes)
+    size_t len, u_char *from, u_char *to, size_t *conved_bytes,
+    size_t *rest_bytes)
 {
     iconv_t           cd;
     ngx_chain_t      *cl, *chain, **ll;
@@ -409,6 +417,7 @@ ngx_http_do_iconv(ngx_http_request_t *r, ngx_chain_t **c, void *data,
     ll = &chain;
 
 conv_begin:
+
     while (len) {
         cl = ngx_alloc_chain_link(r->pool);
         if (cl == NULL) {
@@ -444,7 +453,7 @@ conv_begin:
 
                 if (errno == EILSEQ) {
                     ngx_log_error(NGX_LOG_NOTICE, r->connection->log, 0,
-                        "iconv sees invalid character sequence (EILSEQ)");
+                                  "iconv sees invalid character sequence (EILSEQ)");
 
                     if (len >= 1) {
                         if (rest == 0) {
@@ -453,6 +462,7 @@ conv_begin:
                             *ll = cl;
                             ll = &cl->next;
                             goto conv_begin;
+
                         } else {
                             dd("EILSEQ:rest=%d", (int)rest);
                             len--;
@@ -462,12 +472,14 @@ conv_begin:
                             b->last = (u_char *)b->last + 1;
                             rest--;
                         }
+
                     } else {
                         goto conv_done;
                     }
 
                 }
             }
+
         } while (rv == (size_t) -1 && errno == EILSEQ);
 
         /* E2BIG error is not considered*/
@@ -497,14 +509,17 @@ conv_begin:
     }
 
 conv_done:
+
     *ll = NULL;
     if (conved_bytes) {
         *conved_bytes = cv;
     }
+
     if (rest_bytes) {
         dd("rest bytes:%zu", len);
         *rest_bytes = len;
     }
+
     if (c) {
         dd("chain: %p", chain);
 
@@ -516,6 +531,7 @@ conv_done:
         */
         *c = chain;
     }
+
     dd("out");
     iconv_close(cd);
     return NGX_OK;
@@ -554,10 +570,12 @@ ngx_http_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         dd("invalid 'from='");
         return NGX_CONF_ERROR;
     }
+
     ilcf->from = ngx_palloc(cf->pool, value[1].len - tl + 1);
     if (ilcf->from == NULL) {
         return NGX_CONF_ERROR;
     }
+
     p = ngx_copy(ilcf->from, value[1].data + tl, value[1].len - tl);
     *p = '\0';
 
@@ -568,14 +586,17 @@ ngx_http_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         dd("invalid 'to='");
         return NGX_CONF_ERROR;
     }
+
     ilcf->to = ngx_palloc(cf->pool, value[2].len - tl + 1);
     if (ilcf->to == NULL) {
         return NGX_CONF_ERROR;
     }
+
     p = ngx_copy(ilcf->to, value[2].data + tl, value[2].len - tl);
     *p = '\0';
 
     dd("iconv_filter:from=%s to=%s", ilcf->from, ilcf->to);
+
     return NGX_CONF_OK;
 }
 
@@ -603,6 +624,7 @@ ngx_http_set_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     {
         return NGX_CONF_ERROR;
     }
+
     s[1].data += sizeof("from=") - 1;
     s[1].len -= (sizeof("from=") - 1);
 
@@ -610,6 +632,7 @@ ngx_http_set_iconv_conf_handler(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     if (ngx_strncasecmp((u_char *) "to=", s[2].data, sizeof("to=") - 1) != 0) {
         return NGX_CONF_ERROR;
     }
+
     s[2].data += sizeof("to=") - 1;
     s[2].len -= (sizeof("to=") - 1);
 
@@ -656,11 +679,12 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
 
     dd("dst:%s\n, src:%s\n", dst, src);
     rc = ngx_http_do_iconv(r, &chain, v[0].data, v[0].len, src, dst,
-            &converted, NULL);
+                           &converted, NULL);
     if (rc == NGX_ERROR) {
         dd("convert error");
         return NGX_ERROR;
     }
+
     res->data = ngx_palloc(r->pool, converted);
     if (res->data == NULL) {
         return NGX_ERROR;
@@ -709,19 +733,24 @@ static char
     prev = parent;
 
     dd("before merge:conf->size=%d,prev->size=%d", (int) conf->buf_size,
-            (int) prev->buf_size);
+       (int) prev->buf_size);
+
     if (conf->buf_size <= 1 || prev->buf_size <= 1) {
         ngx_log_error(NGX_LOG_ERR, cf->log, 0,
-                "iconv_buffer_size must not less than 2 bytes");
+                      "iconv_buffer_size must not less than 2 bytes");
         return NGX_CONF_ERROR;
     }
+
     ngx_conf_merge_size_value(conf->buf_size, prev->buf_size,
             (size_t) ngx_pagesize);
+
     dd("after merge:conf->size=%d,prev->size=%d", (int) conf->buf_size,
-            (int) prev->buf_size);
+       (int) prev->buf_size);
+
     ngx_conf_merge_value(conf->enabled, prev->enabled, 0);
     ngx_conf_merge_value(conf->skip_body_filter, prev->skip_body_filter, 0);
     ngx_conf_merge_ptr_value(conf->from, (void *)prev->from, (char *) "utf-8");
     ngx_conf_merge_ptr_value(conf->to, (void *)prev->to, (char *) "gbk");
+
     return NGX_CONF_OK;
 }
