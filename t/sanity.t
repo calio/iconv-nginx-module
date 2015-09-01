@@ -1,4 +1,4 @@
-# vi:filetype=perl
+# vi:filetype=
 
 use lib 'lib';
 use Test::Nginx::Socket;
@@ -188,7 +188,7 @@ GET /foo
 
 
 
-=== TEST 9
+=== TEST 9:
 --- config
     location /foo {
         iconv_filter from=utf-8 to=gbk;
@@ -395,7 +395,7 @@ GET /main
 
 
 
-=== TEST 20 :iconv_filter used with proxy_pass
+=== TEST 20: iconv_filter used with proxy_pass
 --- config
     location /foo {
         #set_form_input $data;

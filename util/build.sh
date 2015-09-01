@@ -9,14 +9,14 @@ force=$2
 
          #--with-cc="gcc46" \
 ngx-build $force $version \
-          --with-ld-opt="-L$PCRE_LIB -Wl,-rpath,$PCRE_LIB:$LUAJIT_LIB:/usr/local/lib" \
-          --with-cc-opt='-O0' \
+          --with-ld-opt="-L$PCRE_LIB -Wl,-rpath,$PCRE_LIB:/usr/local/lib" \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root/../ndk-nginx-module \
           --add-module=$root/../lua-nginx-module \
           --add-module=$root/../set-misc-nginx-module \
           --add-module=$root/../form-input-nginx-module \
           --add-module=$root/../rds-json-nginx-module \
+          --add-module=$root/../headers-more-nginx-module \
           --add-module=$root $opts \
             --with-debug \
           || exit 1
