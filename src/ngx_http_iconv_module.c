@@ -150,7 +150,7 @@ ngx_http_iconv_header_filter(ngx_http_request_t *r)
     }
 
     if (r->http_version < NGX_HTTP_VERSION_10) {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+        ngx_log_error(NGX_LOG_WARN, r->connection->log, 0,
                       "iconv does not support HTTP < 1.0 yet");
         return ngx_http_next_header_filter(r);
     }

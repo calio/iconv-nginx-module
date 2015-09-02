@@ -5,7 +5,7 @@ use Test::Nginx::Socket;
 
 repeat_each(3);
 
-plan tests => repeat_each() * (2 * blocks() + 1);
+plan tests => repeat_each() * (2 * blocks() + 3);
 
 #no_long_string();
 
@@ -108,3 +108,7 @@ Connection: close\r
 --- grep_error_log eval: qr/iconv does not support HTTP < 1.0 yet/
 --- grep_error_log_out
 iconv does not support HTTP < 1.0 yet
+--- error_log
+[warn]
+--- no_error_log
+[error]
