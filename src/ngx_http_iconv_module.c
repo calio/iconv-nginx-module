@@ -117,13 +117,16 @@ static ngx_http_output_header_filter_pt ngx_http_next_header_filter;
 static ngx_http_output_body_filter_pt   ngx_http_next_body_filter;
 
 
-static ngx_int_t ngx_http_iconv_filter_pre(ngx_conf_t *cf)
+static ngx_int_t
+ngx_http_iconv_filter_pre(ngx_conf_t *cf)
 {
     ngx_http_iconv_filter_used  = 0;
     return NGX_OK;
 }
 
-static ngx_int_t ngx_http_iconv_filter_init(ngx_conf_t *cf)
+
+static ngx_int_t
+ngx_http_iconv_filter_init(ngx_conf_t *cf)
 {
     if (ngx_http_iconv_filter_used) {
         ngx_http_next_header_filter = ngx_http_top_header_filter;
@@ -692,7 +695,8 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
 }
 
 
-static void *ngx_http_iconv_create_loc_conf(ngx_conf_t *cf)
+static void *
+ngx_http_iconv_create_loc_conf(ngx_conf_t *cf)
 {
     ngx_http_iconv_loc_conf_t       *ilcf;
 
@@ -709,8 +713,8 @@ static void *ngx_http_iconv_create_loc_conf(ngx_conf_t *cf)
 }
 
 
-static char
-*ngx_http_iconv_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
+static char *
+ngx_http_iconv_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 {
     ngx_http_iconv_loc_conf_t       *conf, *prev;
 
@@ -727,7 +731,7 @@ static char
     }
 
     ngx_conf_merge_size_value(conf->buf_size, prev->buf_size,
-            (size_t) ngx_pagesize);
+                              (size_t) ngx_pagesize);
 
     dd("after merge:conf->size=%d,prev->size=%d", (int) conf->buf_size,
        (int) prev->buf_size);
