@@ -27,7 +27,6 @@ typedef struct {
 
 
 typedef struct {
-    ngx_http_request_t      *r;
     ngx_str_t                uc; /* unfinished character */
 } ngx_http_iconv_ctx_t;
 
