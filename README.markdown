@@ -1,15 +1,34 @@
-= Name =
+<!---
+Don't edit this file manually! Instead you should generate it by using:
+    wiki2markdown.pl doc/manpage.wiki
+-->
+
+Name
+====
 
 iconv-nginx-module
 
-= Description =
+Table of Contents
+=================
+
+* [Name](#name)
+* [Description](#description)
+* [Usage](#usage)
+* [Compatibility](#compatibility)
+* [Installation](#installation)
+* [Copyright & License](#copyright--license)
+* [Changelog](#changelog)
+
+Description
+===========
 
 This is a nginx module that uses libiconv to convert characters of different
 encoding. It brings the 'set_iconv' command to nginx.
 
 This module depends on the ngx_devel_kit(NDK) module.
 
-= Usage =
+Usage
+=====
 
     set_iconv <destination variable> <from variable> from=<from encoding> to=<to encoding>;
     iconv_buffer_size <size>;   #default iconv_buffer_size is ngx_pagesize
@@ -17,23 +36,25 @@ This module depends on the ngx_devel_kit(NDK) module.
 
 Here is a basic example:
 
-<geshi lang="nginx">
-    #nginx.conf
+```nginx
 
-    location /foo {
-        set $src '你好'; #in UTF-8
-        set_iconv $dst $src from=utf8 to=gbk; #now $dst holds 你好 in GBK
-    }
+ #nginx.conf
 
-    #everything generated from /foo will be converted from utf8 to gbk
-    location /bar {
-        iconv_filter from=utf-8 to=gbk;
-        iconv_buffer_size 1k;
-        #content handler here
-    }
-</geshi>
+ location /foo {
+     set $src '你好'; #in UTF-8
+     set_iconv $dst $src from=utf8 to=gbk; #now $dst holds 你好 in GBK
+ }
 
-= Compatibility =
+ #everything generated from /foo will be converted from utf8 to gbk
+ location /bar {
+     iconv_filter from=utf-8 to=gbk;
+     iconv_buffer_size 1k;
+     #content handler here
+ }
+```
+
+Compatibility
+=============
 
 The following versions of Nginx should work with this module:
 
@@ -51,25 +72,32 @@ The following versions of Nginx should work with this module:
 * 0.8.x (last tested: 0.8.54)
 * 0.7.x (last tested: 0.7.68)
 
-= Installation =
+[Back to TOC](#table-of-contents)
+
+Installation
+============
 
 Get the nginx source code from nginx.org (http://nginx.org/).
 Untar the source code and build nginx with this module.
 
-<geshi lang="bash">
-    wget 'http://sysoev.ru/nginx/nginx-1.9.3.tar.gz'
-    tar -xzvf nginx-1.9.3.tar.gz
-    cd nginx-1.9.3/
+```bash
 
-    git-clone http://github.com/simpl-it/ngx_devel_kit.git
-    git-clone http://github.com/calio/form-input-module.git
+ wget 'http://sysoev.ru/nginx/nginx-1.9.3.tar.gz'
+ tar -xzvf nginx-1.9.3.tar.gz
+ cd nginx-1.9.3/
 
-    ./configure --add-module=/path/to/iconv-nginx-module/ --add-module=/path/to/ngx_devel_kit
-    make -j2
-    make install
-</geshi>
+ git-clone http://github.com/simpl-it/ngx_devel_kit.git
+ git-clone http://github.com/calio/form-input-module.git
 
-= Copyright & License =
+ ./configure --add-module=/path/to/iconv-nginx-module/ --add-module=/path/to/ngx_devel_kit
+ make -j2
+ make install
+```
+
+[Back to TOC](#table-of-contents)
+
+Copyright & License
+===================
 
 This program is licenced under the BSD license.
 
@@ -104,8 +132,11 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-= Changelog =
+[Back to TOC](#table-of-contents)
+
+Changelog
+=========
 
 This module's change logs are part of the OpenResty bundle's change logs. Please see
-See http://openresty.org/#Changes
+See <http://openresty.org/#Changes>
 
