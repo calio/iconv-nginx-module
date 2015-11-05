@@ -14,10 +14,14 @@ Table of Contents
 * [Name](#name)
 * [Description](#description)
 * [Usage](#usage)
+    * [set_iconv](#set_iconv)
+    * [iconv_buffer_size](#iconv_buffer_size)
+    * [iconv_filter](#iconv_filter)
 * [Compatibility](#compatibility)
 * [Installation](#installation)
 * [Copyright & License](#copyright--license)
 * [Changelog](#changelog)
+* [See Also](#see-also)
 
 Description
 ===========
@@ -30,9 +34,34 @@ This module depends on the ngx_devel_kit(NDK) module.
 Usage
 =====
 
-    set_iconv <destination variable> <from variable> from=<from encoding> to=<to encoding>;
-    iconv_buffer_size <size>;   #default iconv_buffer_size is ngx_pagesize
-    iconv_filter from=<from encoding> to=<to encoding>;
+set_iconv
+---------
+
+**syntax:** *set_iconv &lt;destination_variable&gt; &lt;from_variable&gt; from=&lt;from_encoding&gt; to=&lt;to_encoding&gt;*
+
+**default:** *none*
+
+**phase:** *rewrite*
+
+[Back to TOC](#table-of-contents)
+
+iconv_buffer_size
+-----------------
+
+**syntax:** *iconv_buffer_size &lt;size&gt;*
+
+**default:** *iconv_buffer_size &lt;pagesize&gt;*
+
+[Back to TOC](#table-of-contents)
+
+iconv_filter
+------------
+
+**syntax:** *iconv_filter from=&lt;from_encoding&gt; to=&lt;to_encoding&gt;*
+
+**default:** *none*
+
+**phase:** *output-filter*
 
 Here is a basic example:
 
@@ -52,6 +81,8 @@ Here is a basic example:
      #content handler here
  }
 ```
+
+[Back to TOC](#table-of-contents)
 
 Compatibility
 =============
@@ -140,3 +171,9 @@ Changelog
 This module's change logs are part of the OpenResty bundle's change logs. Please see
 See <http://openresty.org/#Changes>
 
+[Back to TOC](#table-of-contents)
+
+See Also
+========
+
+* The [OpenResty](https://openresty.org) bundle.
