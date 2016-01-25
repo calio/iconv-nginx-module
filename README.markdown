@@ -132,9 +132,9 @@ Copyright & License
 
 This program is licenced under the BSD license.
 
-Copyright (c) 2010, Calio <vipcalio@gmail.com>.
+Copyright (c) 2010-2016, Calio <vipcalio@gmail.com>.
 
-Copyright (c) 2010-2015, Yichun Zhang <agentzh@gmail.com>.
+Copyright (c) 2010-2016, Yichun Zhang <agentzh@gmail.com>.
 
 All rights reserved.
 
