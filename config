@@ -1,8 +1,17 @@
-if echo $HTTP_MODULES | grep " ndk_http_module" > /dev/null; then
-    echo "found ngx_devel_kit for ngx_iconv; looks good."
+if test -n "$ngx_module_link"; then
+    if test -n "$NDK_SRCS"; then
+        echo "found ngx_devel_kit for ngx_iconv; looks good."
+    else
+        echo "error: ngx_devel_kit is required to build ngx_iconv; please put it before ngx_iconv." 1>&2
+        exit 1
+    fi
 else
-    echo "error: ngx_devel_kit is required to build ngx_iconv; please put it before ngx_iconv." 1>&2
-    exit 1
+    if echo $HTTP_MODULES | grep " ndk_http_module" > /dev/null; then
+        echo "found ngx_devel_kit for ngx_iconv; looks good."
+    else
+        echo "error: ngx_devel_kit is required to build ngx_iconv; please put it before ngx_iconv." 1>&2
+        exit 1
+    fi
 fi
 
 ngx_feature_name=
@@ -86,7 +95,22 @@ fi
 
 ngx_addon_name=ngx_http_iconv_module
 
-HTTP_AUX_FILTER_MODULES="$HTTP_AUX_FILTER_MODULES ngx_http_iconv_module"
-NGX_ADDON_SRCS="$NGX_ADDON_SRCS $ngx_addon_dir/src/ngx_http_iconv_module.c"
-NGX_ADDON_DEPS="$NGX_ADDON_DEPS $ngx_addon_dir/src/ddebug.h"
+HTTP_ICONV_DEPS="$ngx_addon_dir/src/ddebug.h"
+HTTP_ICONV_SRCS="$ngx_addon_dir/src/ngx_http_iconv_module.c"
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP_AUX_FILTER
+    ngx_module_name=$ngx_addon_name
+    ngx_module_incs=
+    ngx_module_deps="$HTTP_ICONV_DEPS"
+    ngx_module_srcs="$HTTP_ICONV_SRCS"
+    ngx_module_libs=
+
+    . auto/module
+else
+    HTTP_AUX_FILTER_MODULES="$HTTP_AUX_FILTER_MODULES $ngx_addon_name"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $HTTP_ICONV_SRCS"
+    NGX_ADDON_DEPS="$NGX_ADDON_DEPS $HTTP_ICONV_DEPS"
+fi
+
 CFLAGS="$CFLAGS -DNDK_SET_VAR"
