@@ -90,7 +90,7 @@ Compatibility
 
 The following versions of Nginx should work with this module:
 
-* 1.9.x (last tested: 1.9.3)
+* 1.9.x (last tested: 1.9.15)
 * 1.8.x
 * 1.7.x
 * 1.6.x
@@ -109,14 +109,14 @@ The following versions of Nginx should work with this module:
 Installation
 ============
 
-Get the nginx source code from nginx.org (http://nginx.org/).
+Get the nginx source code from [nginx.org](http://nginx.org/).
 Untar the source code and build nginx with this module.
 
 ```bash
 
- wget 'http://sysoev.ru/nginx/nginx-1.9.3.tar.gz'
- tar -xzvf nginx-1.9.3.tar.gz
- cd nginx-1.9.3/
+ wget 'http://sysoev.ru/nginx/nginx-1.9.15.tar.gz'
+ tar -xzvf nginx-1.9.15.tar.gz
+ cd nginx-1.9.15/
 
  git-clone http://github.com/simpl-it/ngx_devel_kit.git
  git-clone http://github.com/calio/form-input-module.git
