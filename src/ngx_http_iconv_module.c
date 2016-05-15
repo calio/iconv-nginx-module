@@ -428,7 +428,7 @@ conv_begin:
                 if (errno == EINVAL) {
                     cv += iconv_buf_size - rest;
                     dd("iconv error:EINVAL,len=%d cv=%d rest=%d", (int) len,
-                        (int) cv, (int) rest);
+                       (int) cv, (int) rest);
                     goto conv_done;
                 }
 
@@ -452,7 +452,7 @@ conv_begin:
                             goto conv_begin;
 
                         } else {
-                            dd("EILSEQ:rest=%d", (int)rest);
+                            dd("EILSEQ:rest=%d", (int) rest);
                             len--;
                             data = (u_char *)data + 1;
                             /* replace illegal character to '?' */
@@ -687,8 +687,8 @@ ngx_http_set_iconv_handler(ngx_http_request_t *r, ngx_str_t *res,
         p = ngx_copy(p, buf->pos, buf->last - buf->pos);
     }
 
-    dd("%.*s\n%.*s\n%.*s\n",v[0].len, v[0].data,v[1].len, v[1].data, v[2].len,
-            v[2].data);
+    dd("%.*s\n%.*s\n%.*s\n", v[0].len, v[0].data, v[1].len, v[1].data, v[2].len,
+       v[2].data);
 
     return NGX_OK;
 }
