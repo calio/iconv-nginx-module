@@ -1,29 +1,16 @@
 {
-<insert_a_suppression_name_here>
-Memcheck:Leak
-fun:malloc
-fun:ngx_alloc
-obj:*
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:ngx_alloc
+   obj:*
 }
 {
-<insert_a_suppression_name_here>
-Memcheck:Addr4
-fun:lj_str_new
-fun:lua_getfield
-fun:ngx_http_lua_cache_load_code
-}
-{
-<insert_a_suppression_name_here>
-Memcheck:Leak
-fun:malloc
-fun:ngx_alloc
-fun:ngx_event_process_init
-}
-{
-<insert_a_suppression_name_here>
-Memcheck:Leak
-fun:malloc
-fun:ngx_alloc
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:ngx_alloc
+   fun:ngx_event_process_init
 }
 {
    <insert_a_suppression_name_here>
@@ -48,50 +35,10 @@ fun:ngx_alloc
    Memcheck:Leak
    fun:malloc
    fun:ngx_alloc
-   fun:ngx_malloc
-   fun:ngx_pnalloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_malloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
    fun:ngx_create_pool
    fun:ngx_event_accept
    fun:ngx_epoll_process_events
    fun:ngx_process_events_and_timers
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_malloc
-   fun:ngx_palloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Leak
-   fun:malloc
-   fun:ngx_alloc
-   fun:ngx_palloc_large
-   fun:ngx_palloc
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Addr4
-   fun:lj_str_new
-   fun:lua_setfield
-   fun:ngx_http_lua_cache_store_code
 }
 {
    <insert_a_suppression_name_here>
@@ -106,7 +53,7 @@ fun:ngx_alloc
    fun:ngx_conf_flush_files
 }
 {
-   a1 
+   a1
    Memcheck:Leak
    fun:_vgrZU_libcZdsoZa_malloc
    fun:ngx_strerror_init
