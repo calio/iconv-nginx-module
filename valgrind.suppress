@@ -24,7 +24,6 @@ fun:ngx_event_process_init
 Memcheck:Leak
 fun:malloc
 fun:ngx_alloc
-fun:(below main)
 }
 {
    <insert_a_suppression_name_here>
@@ -148,7 +147,7 @@ fun:(below main)
    fun:main
 }
 {
-   /lib/libc-2.12.so
+   libc-2.12.so
    Memcheck:Param
    epoll_ctl(event)
    fun:epoll_ctl
