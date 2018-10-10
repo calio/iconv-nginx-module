@@ -172,7 +172,7 @@ ngx_http_iconv_header_filter(ngx_http_request_t *r)
          *   ctx->uc->len = 0
          *   ctx->uc->data = NULL
          */
-        ctx = ngx_pcalloc(r->pool, sizeof(ngx_http_iconv_module));
+        ctx = ngx_pcalloc(r->pool, sizeof(ngx_http_iconv_ctx_t));
         if (ctx == NULL) {
             return NGX_ERROR;
         }
